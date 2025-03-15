@@ -1,0 +1,38 @@
+{
+  "name": "nebula-tools-typescript",
+  "version": "0.1.0",
+  "author": "thirdweb",
+  "description": "AI function tools definition for TypeScript",
+  "type": "module",
+  "main": "./dist/cjs/exports/nebula.js",
+  "module": "./dist/esm/exports/nebula.js",
+  "types": "./dist/types/exports/nebula.d.ts",
+  "typings": "./dist/types/exports/nebula.d.ts",
+  "scripts": {
+    "dev": "tsc --project ./tsconfig.build.json --module es2020 --outDir ./dist/esm --watch",
+    "format": "biome format ./src --write",
+    "lint": "biome check ./src && tsc --project ./tsconfig.json --module esnext --noEmit",
+    "fix": "biome check ./src --fix",
+    "build": "pnpm build:types && pnpm build:cjs && pnpm build:esm",
+    "build:cjs": "tsc --noCheck --project ./tsconfig.build.json --module commonjs --outDir ./dist/cjs --verbatimModuleSyntax false && printf '{\"type\":\"commonjs\"}' > ./dist/cjs/package.json",
+    "build:esm": "tsc --noCheck --project ./tsconfig.build.json --module es2020 --outDir ./dist/esm && printf '{\"type\": \"module\",\"sideEffects\":false}' > ./dist/esm/package.json",
+    "build:types": "tsc --project ./tsconfig.build.json --module esnext --declarationDir ./dist/types --emitDeclarationOnly --declaration --declarationMap"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "browser": {
+    "crypto": false
+  },
+  "sideEffects": false,
+  "files": [
+    "dist/*",
+    "src/*"
+  ],
+  "license": "MIT",
+  "packageManager": "pnpm@10.5.2",
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "typescript": "^5.8.2"
+  }
+}

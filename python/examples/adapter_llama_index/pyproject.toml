@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "thirdweb-ai-examples-llama-index"
+version = "0.1.0"
+description = "Example of using thirdweb_ai with LlamaIndex"
+authors = ["thirdweb <support@thirdweb.com>"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.10"
+thirdweb-ai = { version = "*", extras = ["llama-index"] }
+llama-index = "^0.12.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api" 

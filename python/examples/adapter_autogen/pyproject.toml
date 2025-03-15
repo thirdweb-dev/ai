@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "thirdweb-ai-examples-autogen"
+version = "0.1.0"
+description = "Example of using thirdweb_ai with AutoGen"
+authors = ["thirdweb <support@thirdweb.com>"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.10"
+thirdweb-ai = { version = "*", extras = ["autogen"] }
+autogen-agentchat = "^0.4.0"
+autogen-ext = { version = "^0.4.0", extras = ["openai"] }
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api" 
