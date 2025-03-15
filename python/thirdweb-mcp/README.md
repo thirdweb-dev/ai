@@ -107,7 +107,7 @@ Integrates with thirdweb's backend infrastructure:
 
 ## License
 
-[MIT License](LICENSE)
+[Apache-2.0 License](LICENSE)
 
 ## Support
 

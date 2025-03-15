@@ -3,6 +3,7 @@ name = "thirdweb-mcp"
 version = "0.1.1"
 description = "thirdweb MCP"
 authors = ["thirdweb <support@thirdweb.com>"]
+license = "Apache-2.0"
 readme = "README.md"
 packages = [{ include = "src" }]
 
