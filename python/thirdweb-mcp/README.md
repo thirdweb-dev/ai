@@ -17,16 +17,19 @@ thirdweb MCP provides a unified interface to access thirdweb's suite of blockcha
 - Python 3.10 or higher
 - Poetry (recommended for dependency management)
 
-### Install with uvx
-```
+### Run with uvx
+```bash
 THIRDWEB_SECRET_KEY=... \
     uvx thirdweb-mcp
 ```
 
-### Install with pipx
+### Install and run with pipx
 
 ```bash
 pipx install thirdweb-mcp
+
+THIRDWEB_SECRET_KEY=... \
+    thirdweb-mcp
 ```
 
 ### Install from source

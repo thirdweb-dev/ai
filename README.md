@@ -29,6 +29,24 @@ AI-powered blockchain interaction:
 
 ## 🚀 Quickstart
 
+### MCP
+
+#### Installation
+
+```bash
+### Run using uvx
+THIRDWEB_SECRET_KEY=... \
+    uvx thirdweb-mcp
+
+### Install and run using pipx
+pipx install thirdweb-mcp
+
+THIRDWEB_SECRET_KEY=... \
+    thirdweb-mcp
+```
+
+More [information](python/thirdweb-mcp)
+
 ### Python
 
 #### Installation
@@ -74,6 +92,7 @@ agent = Agent(name="thirdweb Assistant", tools=tools)
 # see python/examples for other framework integration
 ```
 
+More [information](python/thirdweb-ai)
 
 ### TypeScript
 
