@@ -177,13 +177,13 @@ files = [
 
 [[package]]
 name = "mcp"
-version = "1.4.0"
+version = "1.4.1"
 description = "Model Context Protocol SDK"
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "mcp-1.4.0-py3-none-any.whl", hash = "sha256:d2760e1ea7635b1e70da516698620a016cde214976416dd894f228600b08984c"},
-    {file = "mcp-1.4.0.tar.gz", hash = "sha256:5b750b14ca178eeb7b2addbd94adb21785d7b4de5d5f3577ae193d787869e2dd"},
+    {file = "mcp-1.4.1-py3-none-any.whl", hash = "sha256:a7716b1ec1c054e76f49806f7d96113b99fc1166fc9244c2c6f19867cb75b593"},
+    {file = "mcp-1.4.1.tar.gz", hash = "sha256:b9655d2de6313f9d55a7d1df62b3c3fe27a530100cc85bf23729145b0dba4c7a"},
 ]
 
 [package.dependencies]
@@ -474,30 +474,31 @@ full = ["httpx (>=0.27.0,<0.29.0)", "itsdangerous", "jinja2", "python-multipart 
 
 [[package]]
 name = "thirdweb-ai"
-version = "0.0.1"
+version = "0.1.1"
 description = "thirdweb AI"
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "thirdweb_ai-0.0.1-py3-none-any.whl", hash = "sha256:38ba4520d54b02b4219f839d5bdfa76ef0d86a0257bbd88b8e8f023870609cf3"},
-    {file = "thirdweb_ai-0.0.1.tar.gz", hash = "sha256:4f17c021d3958a300add673865e7babc687471ae232425f1eddcfedfde106c4d"},
+    {file = "thirdweb_ai-0.1.1-py3-none-any.whl", hash = "sha256:46ba7cdf8c77ac96f412b1f1504102c0eb6969cb2876991667341ee03baf579a"},
+    {file = "thirdweb_ai-0.1.1.tar.gz", hash = "sha256:f2d38d5b735852e4f6240c19fe703ff2ce0a35d2067fa1e8fc62ddcd5592e1a1"},
 ]
 
 [package.dependencies]
 httpx = ">=0.28.1,<0.29.0"
 jsonref = ">=1.1.0,<2.0.0"
-mcp = {version = ">=1.3.0,<2.0.0", optional = true, markers = "extra == \"all\" or extra == \"mcp\""}
+mcp = {version = ">=1.3.0", optional = true, markers = "extra == \"all\" or extra == \"mcp\""}
 pydantic = ">=2.10.6,<3.0.0"
 
 [package.extras]
-agentkit = ["coinbase-agentkit (>=0.1.0)"]
-all = ["autogen-core (>=0.4.0)", "coinbase-agentkit (>=0.1.0)", "goat-sdk (>=0.1.0)", "langchain-core (>=0.3.0)", "llama-index-core (>=0.12.0)", "mcp (>=1.3.0,<2.0.0)", "openai-agents (>=0.0.1)", "smolagents (>=1.10.0)"]
+agentkit = ["coinbase-agentkit (>=0.1.0,<0.2.0)"]
+all = ["autogen-core (>=0.4.0)", "coinbase-agentkit (>=0.1.0,<0.2.0)", "goat-sdk (>=0.1.0)", "langchain-core (>=0.3.0)", "llama-index-core (>=0.12.0)", "mcp (>=1.3.0)", "openai-agents (>=0.0.1)", "pydantic-ai (>=0.0.39)", "smolagents (>=1.10.0)"]
 autogen = ["autogen-core (>=0.4.0)"]
 goat = ["goat-sdk (>=0.1.0)"]
 langchain = ["langchain-core (>=0.3.0)"]
 llama-index = ["llama-index-core (>=0.12.0)"]
-mcp = ["mcp (>=1.3.0,<2.0.0)"]
+mcp = ["mcp (>=1.3.0)"]
 openai = ["openai-agents (>=0.0.1)"]
+pydantic-ai = ["pydantic-ai (>=0.0.39)"]
 smolagents = ["smolagents (>=1.10.0)"]
 
 [[package]]
@@ -533,4 +534,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.6.3)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "262ac7a558b398df13770e18c66c025970951a7f30a93eb173983f082a3404a4"
+content-hash = "80eeda1a4bc0653fe461d907b29ab8a6efae844b1d541db12dcf895bfeb3c0b7"
