@@ -1,12 +1,12 @@
 # thirdweb MCP Server
 
-A Model Control Protocol (MCP) server implementation for thirdweb services integration. This server allows you to integrate thirdweb's AI-powered blockchain tools with any MCP-compatible client.
+A Model Control Protocol (MCP) server implementation for thirdweb services integration. This server allows you to integrate thirdweb's tools with any MCP-compatible client.
 
 ## Overview
 
 thirdweb MCP provides a unified interface to access thirdweb's suite of blockchain tools and services through the standardized Model Control Protocol. It supports multiple communication transports and can be integrated with various thirdweb services:
 
-- **Nebula**: AI-powered smart contract tools for analysis, code generation and interactions
+- **Nebula**: Autonomous onchain execution - real-time on-chain analysis, code generation and contract interactions
 - **Insight**: Blockchain data analysis capabilities for real-time on-chain data
 - **Engine**: Integration with thirdweb's backend infrastructure for contract deployments and interactions
 
@@ -62,10 +62,10 @@ THIRDWEB_SECRET_KEY=... thirdweb-mcp
 THIRDWEB_SECRET_KEY=... thirdweb-mcp --transport sse --port 8080
 
 # Enabling all services with specific chain IDs
-THIRDWEB_SECRET_KEY=... thirdweb-mcp --services nebula --services insight --services engine \
-    --chain-id 1 --chain-id 137 \
+THIRDWEB_SECRET_KEY=... thirdweb-mcp --chain-id 1 --chain-id 137 \
     --engine-url YOUR_ENGINE_URL \
-    --engine-auth-jwt YOUR_ENGINE_JWT
+    --engine-auth-jwt YOUR_ENGINE_JWT \ 
+    --engine-backend-wallet-address YOUR_ENGINE_BACKEND_WALLET_ADDRESS
 ```
 
 ### Environment variables
@@ -76,6 +76,39 @@ You can also configure the MCP server using environment variables:
 - `THIRDWEB_ENGINE_URL`: URL endpoint for thirdweb Engine service
 - `THIRDWEB_ENGINE_AUTH_JWT`: Authentication JWT token for Engine
 - `THIRDWEB_ENGINE_BACKEND_WALLET_ADDRESS`: Wallet address for Engine backend
+
+### Integration with Claude Desktop
+To add this MCP server to Claude Desktop:
+
+1. Install the MCP: `pipx install thirdweb-mcp`
+
+2. Create or edit the Claude Desktop configuration file at:
+   - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+   - Linux: `~/.config/Claude/claude_desktop_config.json`
+
+3. Add the following configuration:
+
+   ```json
+   {
+     "mcpServers": {
+       "thirdweb-mcp": {
+         "command": "thirdweb-mcp",
+         "args": [], // add `--chain-id` optionally
+         "env": {
+           "THIRDWEB_SECRET_KEY": "your thirdweb secret key from dashboard",
+           "THIRDWEB_ENGINE_URL": "(OPTIONAL) your engine url",
+           "THIRDWEB_ENGINE_AUTH_JWT": "(OPTIONAL) your engine auth jwt",
+           "THIRDWEB_ENGINE_BACKEND_WALLET_ADDRESS": "(OPTIONAL) your engine backend wallet address",           
+         },
+       }
+     }
+   }
+   ```
+
+4. Restart Claude Desktop for the changes to take effect.
+
+Read more on [MCP Quickstart](https://modelcontextprotocol.io/quickstart/user)
 
 ### Integration with MCP clients
 
@@ -89,10 +122,10 @@ This server can be integrated with any client that supports the Model Control Pr
 
 ### Nebula
 
-Provides AI-powered smart contract tools that can:
+Autonomous onchain execution and analysis:
 - Analyze smart contract code
-- Generate contract code based on specifications
-- Assist with contract interactions and deployments
+- Contract interactions and deployments
+- Autonomous onchain tasks execution
 
 ### Insight
 
