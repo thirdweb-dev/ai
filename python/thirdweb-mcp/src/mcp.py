@@ -21,14 +21,6 @@ from thirdweb_ai.adapters.mcp import add_fastmcp_tools
     help="Port number for the MCP SSE server when using the 'sse' transport. Only relevant when transport is set to 'sse'. Default is 8000.",
 )
 @click.option(
-    "-s",
-    "--services",
-    type=click.Choice(["nebula", "insight", "engine"]),
-    default=["nebula", "insight"],
-    multiple=True,
-    help="Thirdweb services to enable. 'nebula' provides AI-powered smart contract tools, 'insight' offers blockchain data analysis capabilities, and 'engine' integrates with thirdweb's backend infrastructure for contract deployments and interactions.",
-)
-@click.option(
     "-k",
     "--secret-key",
     type=str,
@@ -39,6 +31,8 @@ from thirdweb_ai.adapters.mcp import add_fastmcp_tools
     "--chain-id",
     type=int,
     multiple=True,
+    required=False,
+    default=lambda: os.getenv("THIRDWEB_CHAIN_ID"),
     help="Blockchain network IDs to connect to (e.g., 1 for Ethereum mainnet, 137 for Polygon). Multiple chain IDs can be specified to support cross-chain operations. Required for insight when querying blockchain data.",
 )
 @click.option(
@@ -62,40 +56,43 @@ from thirdweb_ai.adapters.mcp import add_fastmcp_tools
 def main(
     port: int,
     transport: str,
-    services: list[str],
     secret_key: str,
     chain_id: list[int],
     engine_url: str,
     engine_auth_jwt: str,
-    engine_backend_wallet_address: str,
+    engine_backend_wallet_address: str | None,
 ):
     mcp = FastMCP("thirdweb MCP", port=port)
 
     chain_ids = [int(chain_id) for chain_id in chain_id]
 
+    # determine which services to enable based on the provided options
+    services = []
+    if secret_key:
+        services.extend(["nebula", "insight"])
+
+    if engine_url and engine_auth_jwt:
+        services.append("engine")
+
+    if not services:
+        raise ValueError(
+            "Please provide a thirdweb secret key through the THIRDWEB_SECRET_KEY environment variable."
+        )
+
+    # enable the tools for each service
     if "nebula" in services:
-        if not secret_key:
-            raise ValueError("THIRDWEB_SECRET_KEY is required for nebula")
         nebula = Nebula(secret_key=secret_key)
         add_fastmcp_tools(mcp, nebula.get_tools())
 
     if "insight" in services:
-        if not secret_key:
-            raise ValueError("THIRDWEB_SECRET_KEY is required for insight")
         insight = Insight(secret_key=secret_key, chain_id=chain_ids)
         add_fastmcp_tools(mcp, insight.get_tools())
 
     if "engine" in services:
-        if not engine_url:
-            raise ValueError("THIRDWEB_ENGINE_URL is required for engine")
-        if not engine_auth_jwt:
-            raise ValueError("THIRDWEB_ENGINE_AUTH_JWT is required for engine")
         engine = Engine(
             engine_url=engine_url,
             engine_auth_jwt=engine_auth_jwt,
-            backend_wallet_address=engine_backend_wallet_address
-            if len(engine_backend_wallet_address) > 0
-            else None,
+            backend_wallet_address=engine_backend_wallet_address,
             chain_id=next(iter(chain_ids)) if chain_ids else None,
             secret_key=secret_key or "",
         )
