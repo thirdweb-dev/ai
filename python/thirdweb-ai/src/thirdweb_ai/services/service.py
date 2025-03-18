@@ -1,5 +1,7 @@
 import inspect
+import platform
 from collections.abc import Callable
+from importlib.metadata import version
 from typing import Any
 
 import httpx
@@ -16,7 +18,13 @@ class Service:
         )
 
     def _make_headers(self):
-        kwargs = {"Content-Type": "application/json"}
+        kwargs = {
+            "Content-Type": "application/json",
+            "X-SDK-Name": "ai",
+            "X-SDK-Version": version("thirdweb-ai"),
+            "X-SDK-Platform": f"python-{platform.python_version()}",
+            "X-SDK-OS": f"{platform.system()}-{platform.release()}",
+        }
         if self.secret_key:
             kwargs["X-Secret-Key"] = self.secret_key
         return kwargs

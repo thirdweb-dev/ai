@@ -489,7 +489,7 @@ class Insight(Service):
         return self._get(f"nfts/transfers/{contract_address}", params)
 
     @tool(
-        description="Resolve ENS names to Ethereum addresses or vice versa. Useful for working with human-readable names instead of addresses."
+        description="An unified resolve function that resolves contract address, transaction hash, and ENS name. Useful for working with human-readable names instead of addresses."
     )
     def resolve(
         self,
