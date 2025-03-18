@@ -474,13 +474,13 @@ full = ["httpx (>=0.27.0,<0.29.0)", "itsdangerous", "jinja2", "python-multipart 
 
 [[package]]
 name = "thirdweb-ai"
-version = "0.1.2"
+version = "0.1.3"
 description = "thirdweb AI"
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "thirdweb_ai-0.1.2-py3-none-any.whl", hash = "sha256:63e8b38d921c3cd0b6c792a98543478ec16f8e622610cba38ecd4839941993bf"},
-    {file = "thirdweb_ai-0.1.2.tar.gz", hash = "sha256:d3449c9567da502099ed97003b1afb0e12664a82e3ef65513105a424cb927ce1"},
+    {file = "thirdweb_ai-0.1.3-py3-none-any.whl", hash = "sha256:e702d05ef3dd961d4fdd09ce68d5c8cfa74f116bcf3ac665da596bb8a475d551"},
+    {file = "thirdweb_ai-0.1.3.tar.gz", hash = "sha256:1f4f0519ce7b14621578a84cf5548e3d319c1315ebb4ec1dae57f794cd96b2a0"},
 ]
 
 [package.dependencies]
@@ -534,4 +534,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.6.3)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "5c18cedc39297a9bef95189d811a356f69f0298af4eb3bf6b4cca0fa29704898"
+content-hash = "9952c3bda1f80915d9545fe4b007e70a2199bb2eb11818649eb9cb85190e9872"
