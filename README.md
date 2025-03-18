@@ -118,6 +118,7 @@ For non-security-related bugs, please use the GitHub issue tracker.
 
 - **Website**: [thirdweb.com](https://thirdweb.com)
 - **X**: [@thirdweb](https://x.com/thirdweb)
+- **Telegram**: [Join our community](https://t.me/officialthirdweb)
 - **Discord**: [Join our community](https://discord.gg/thirdweb)
 - **Email**: support@thirdweb.com
 
