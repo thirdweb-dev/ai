@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "thirdweb-ai-examples-pydantic-ai"
+version = "0.1.0"
+description = "Example of using thirdweb_ai with Pydantic AI"
+authors = ["thirdweb <support@thirdweb.com>"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.10"
+thirdweb-ai = {version = "*", extras = ["pydantic-ai"]}
+pydantic-ai = "^0.0.39"
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api" 
