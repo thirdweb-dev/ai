@@ -12,7 +12,7 @@ class Insight(Service):
     @tool(
         description="Retrieve blockchain events with flexible filtering options. Use this to search for specific events or to analyze event patterns across multiple blocks."
     )
-    def get_events(
+    def get_all_events(
         self,
         chain: Annotated[
             list[int] | int | None,
@@ -22,10 +22,6 @@ class Insight(Service):
             str | None,
             "Contract address to filter events by (e.g., '0x1234...'). Only return events emitted by this contract.",
         ] = None,
-        decode: Annotated[
-            bool | None, "Set to True to decode event data into human-readable format using contract ABIs."
-        ] = None,
-        block_number: Annotated[int | None, "Exact block number to query events from (e.g., 15000000)."] = None,
         block_number_gte: Annotated[int | None, "Minimum block number to start querying from (inclusive)."] = None,
         block_number_lt: Annotated[int | None, "Maximum block number to query up to (exclusive)."] = None,
         transaction_hash: Annotated[
@@ -42,17 +38,21 @@ class Insight(Service):
         page: Annotated[
             int | None, "Page number for paginated results, starting from 0. Use with limit parameter."
         ] = None,
+        sort_order: Annotated[
+            str | None,
+            "Sort order for the events. Default is 'desc' for descending order. Use 'asc' for ascending order.",
+        ] = "desc",
     ) -> dict[str, Any]:
-        params = {}
+        params: dict[str, Any] = {
+            "sort_by": "block_number",
+            "sort_order": sort_order if sort_order in ["asc", "desc"] else "desc",
+            "decode": True,
+        }
         chain = chain or self.chain_ids
         if chain:
             params["chain"] = chain
         if address:
             params["filter_address"] = address
-        if decode:
-            params["decode"] = decode
-        if block_number:
-            params["filter_block_number"] = block_number
         if block_number_gte:
             params["filter_block_number_gte"] = block_number_gte
         if block_number_lt:
@@ -79,9 +79,6 @@ class Insight(Service):
             list[int] | int | None,
             "Chain ID(s) to query (e.g., 1 for Ethereum Mainnet, 137 for Polygon). Specify multiple IDs as a list for cross-chain queries (max 5).",
         ] = None,
-        decode: Annotated[
-            bool | None, "Set to True to decode event data into human-readable format using the contract's ABI."
-        ] = None,
         block_number_gte: Annotated[
             int | None,
             "Only return events from blocks with number greater than or equal to this value. Useful for querying recent history.",
@@ -97,13 +94,19 @@ class Insight(Service):
             int | None,
             "Page number for paginated results, starting from 0. Use with limit parameter for browsing large result sets.",
         ] = None,
+        sort_order: Annotated[
+            str | None,
+            "Sort order for the events. Default is 'desc' for descending order. Use 'asc' for ascending order.",
+        ] = "desc",
     ) -> dict[str, Any]:
-        params = {}
+        params: dict[str, Any] = {
+            "sort_by": "block_number",
+            "sort_order": sort_order if sort_order in ["asc", "desc"] else "desc",
+            "decode": True,
+        }
         chain = chain or self.chain_ids
         if chain:
             params["chain"] = chain
-        if decode:
-            params["decode"] = decode
         if block_number_gte:
             params["filter_block_number_gte"] = block_number_gte
         if topic_0:
@@ -113,51 +116,6 @@ class Insight(Service):
         if page:
             params["page"] = page
         return self._get(f"events/{contract_address}", params)
-
-    @tool(
-        description="Get events for a specific contract filtered by event signature. Useful for tracking particular event types like Transfers, Approvals, or custom events."
-    )
-    def get_contract_events_by_signature(
-        self,
-        contract_address: Annotated[
-            str, "The contract address to query events for (e.g., '0x1234...'). Must be a valid Ethereum address."
-        ],
-        signature: Annotated[
-            str,
-            "Event signature to filter by (e.g., 'Transfer(address,address,uint256)' or the hash '0xddf252ad...'). This determines which type of events to retrieve.",
-        ],
-        chain: Annotated[
-            list[int] | int | None,
-            "Chain ID(s) to query (e.g., 1 for Ethereum, 137 for Polygon). Specify multiple IDs as a list for cross-chain queries.",
-        ] = None,
-        decode: Annotated[
-            bool | None,
-            "Set to True to decode event data into human-readable format. Recommended for easier interpretation.",
-        ] = None,
-        block_number_gte: Annotated[
-            int | None,
-            "Only return events from blocks with number greater than or equal to this value. Useful for recent history.",
-        ] = None,
-        limit: Annotated[
-            int | None, "Maximum number of events to return per request. Default is 20, adjust based on your needs."
-        ] = None,
-        page: Annotated[
-            int | None, "Page number for paginated results, starting from 0. Use for browsing large result sets."
-        ] = None,
-    ) -> dict[str, Any]:
-        params = {}
-        chain = chain or self.chain_ids
-        if chain:
-            params["chain"] = chain
-        if decode:
-            params["decode"] = decode
-        if block_number_gte:
-            params["filter_block_number_gte"] = block_number_gte
-        if limit:
-            params["limit"] = limit
-        if page:
-            params["page"] = page
-        return self._get(f"events/{contract_address}/{signature}", params)
 
     @tool(
         description="Retrieve blockchain transactions with flexible filtering options. Use this to analyze transaction patterns, track specific transactions, or monitor wallet activity."
@@ -180,10 +138,6 @@ class Insight(Service):
             str | None,
             "Filter by function selector (e.g., '0x095ea7b3' for the approve function). Useful for finding specific contract interactions.",
         ] = None,
-        decode: Annotated[
-            bool,
-            "Set to True to decode transaction input data using contract ABIs. Makes contract interactions human-readable.",
-        ] = True,
         sort_order: Annotated[
             str | None,
             "Sort order for the transactions. Default is 'asc' for ascending order. Use 'desc' for descending order.",
@@ -198,8 +152,9 @@ class Insight(Service):
         ] = None,
     ) -> dict[str, Any]:
         params: dict[str, Any] = {
-            "sort_by": "block_timestamp",
+            "sort_by": "block_number",
             "sort_order": sort_order if sort_order in ["asc", "desc"] else "desc",
+            "decode": True,
         }
         chain = chain or self.chain_ids
         if chain:
@@ -210,8 +165,6 @@ class Insight(Service):
             params["filter_to_address"] = to_address
         if function_selector:
             params["filter_function_selector"] = function_selector
-        if decode:
-            params["decode"] = decode
         if limit:
             params["limit"] = limit
         if page:
@@ -313,53 +266,27 @@ class Insight(Service):
         return self._get(f"tokens/erc1155/{owner_address}", params)
 
     @tool(
-        description="Get current market prices for specified tokens. Useful for valuation, tracking portfolio value, or monitoring price changes."
+        description="Get current market prices for native and ERC20 tokens. Useful for valuation, tracking portfolio value, or monitoring price changes."
     )
     def get_token_prices(
         self,
         token_addresses: Annotated[
             list[str],
-            "List of token contract addresses to get prices for (e.g., ['0x1234...', '0x5678...']). Can include ERC20 tokens.",
+            "List of token contract addresses to get prices for (e.g., ['0x1234...', '0x5678...']). Can include ERC20 tokens. Use '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' for native tokens (ETH, POL, MATIC, etc.).",
         ],
         chain: Annotated[
             list[int] | int | None,
             "Chain ID(s) where the tokens exist (e.g., 1 for Ethereum, 137 for Polygon). Must match the token network.",
         ] = None,
-        currencies: Annotated[
-            list[str] | None,
-            "List of currencies to return prices in (e.g., ['usd', 'eth']). Default is USD if not specified.",
-        ] = None,
     ) -> dict[str, Any]:
-        params: dict[str, Any] = {"token_addresses": token_addresses}
+        params: dict[str, Any] = {"address": token_addresses}
         chain = chain or self.chain_ids
         if chain:
             params["chain"] = chain
-        if currencies:
-            params["currencies"] = currencies
         return self._get("tokens/price", params)
 
     @tool(
-        description="Retrieve the Application Binary Interface (ABI) for a smart contract. Essential for decoding contract data and interacting with the contract."
-    )
-    def get_contract_abi(
-        self,
-        contract_address: Annotated[
-            str,
-            "The contract address to get the ABI for (e.g., '0x1234...'). Must be a deployed and verified contract.",
-        ],
-        chain: Annotated[
-            list[int] | int | None,
-            "Chain ID(s) where the contract is deployed (e.g., 1 for Ethereum). Specify the correct network.",
-        ] = None,
-    ) -> dict[str, Any]:
-        params = {}
-        chain = chain or self.chain_ids
-        if chain:
-            params["chain"] = chain
-        return self._get(f"contracts/abi/{contract_address}", params)
-
-    @tool(
-        description="Get metadata about a smart contract, including name, symbol, decimals, and other contract-specific information."
+        description="Get contract ABI and metadata about a smart contract, including name, symbol, decimals, and other contract-specific information. This tool also retrieve the Application Binary Interface (ABI) for a smart contract. Essential for decoding contract data and interacting with the contract"
     )
     def get_contract_metadata(
         self,
@@ -489,13 +416,13 @@ class Insight(Service):
         return self._get(f"nfts/transfers/{contract_address}", params)
 
     @tool(
-        description="Resolve ENS names to Ethereum addresses or vice versa. Useful for working with human-readable names instead of addresses."
+        description="Search and analyze blockchain input data: block number, transaction or block hash, wallet or contract address, event signature or function selector. It returns a detailed analyzed information about the input data."
     )
     def resolve(
         self,
         input_data: Annotated[
             str,
-            "The ENS name (e.g., 'thirdweb.eth') or address (e.g., '0x1234...') to resolve. Works in both directions.",
+            "Any blockchain input data: block number, transaction or block hash, address, event signature or function selector",
         ],
         chain: Annotated[
             list[int] | int | None,
