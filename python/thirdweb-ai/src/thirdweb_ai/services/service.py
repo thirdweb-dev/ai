@@ -22,16 +22,22 @@ class Service:
         return kwargs
 
     def _get(self, path: str, params: dict[str, Any] | None = None, headers: dict[str, Any] | None = None):
+        base_url = self.base_url.rstrip("/")
         path = path.lstrip("/")
-        _headers = {**headers, **self._make_headers()} if headers else self._make_headers()
-        response = self.client.get(f"{self.base_url}/{path}", params=params, headers=_headers)
+        _headers = self._make_headers()
+        if headers:
+            _headers.update(headers)
+        response = self.client.get(f"{base_url}/{path}", params=params, headers=_headers)
         response.raise_for_status()
         return response.json()
 
     def _post(self, path: str, data: dict[str, Any] | None = None, headers: dict[str, Any] | None = None):
+        base_url = self.base_url.rstrip("/")
         path = path.lstrip("/")
-        _headers = {**headers, **self._make_headers()} if headers else self._make_headers()
-        response = self.client.post(f"{self.base_url}/{path}", json=data, headers=_headers)
+        _headers = self._make_headers()
+        if headers:
+            _headers.update(headers)
+        response = self.client.post(f"{base_url}/{path}", json=data, headers=_headers)
         response.raise_for_status()
         return response.json()
 

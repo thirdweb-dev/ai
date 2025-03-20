@@ -19,6 +19,14 @@ class Engine(Service):
         self.backend_wallet_address = backend_wallet_address
         self.chain_id = str(chain_id) if chain_id else None
 
+    def _make_headers(self):
+        headers = super()._make_headers()
+        if self.engine_auth_jwt:
+            headers["Authorization"] = f"Bearer {self.engine_auth_jwt}"
+        if self.backend_wallet_address:
+            headers["X-Backend-Wallet-Address"] = self.backend_wallet_address
+        return headers
+
     @tool(
         description="Create and initialize a new backend wallet controlled by thirdweb Engine. These wallets are securely managed by the Engine service and can be used to sign blockchain transactions, deploy contracts, and execute on-chain operations without managing private keys directly."
     )
@@ -66,13 +74,13 @@ class Engine(Service):
     )
     def get_wallet_balance(
         self,
+        chain_id: Annotated[
+            str,
+            "The numeric blockchain network ID to query (e.g., '1' for Ethereum mainnet, '137' for Polygon). If not provided, uses the default chain ID configured in the Engine instance.",
+        ],
         backend_wallet_address: Annotated[
             str | None,
             "The Ethereum address of the wallet to check (e.g., '0x1234...'). If not provided, uses the default backend wallet address configured in the Engine instance.",
-        ] = None,
-        chain_id: Annotated[
-            str | None,
-            "The numeric blockchain network ID to query (e.g., '1' for Ethereum mainnet, '137' for Polygon). If not provided, uses the default chain ID configured in the Engine instance.",
         ] = None,
     ) -> dict[str, Any]:
         """Get wallet balance for native or ERC20 tokens."""
@@ -81,7 +89,7 @@ class Engine(Service):
         return self._get(f"backend-wallet/{chain_id}/{backend_wallet_address}/get-balance")
 
     @tool(
-        description="Send an on-chain transaction from a backend wallet. This powerful function can transfer native currency (ETH, MATIC), ERC20 tokens, or execute any arbitrary contract interaction. The transaction is signed and broadcast to the blockchain automatically by the Engine service."
+        description="Send an on-chain transaction. This powerful function can transfer native currency (ETH, MATIC), ERC20 tokens, or execute any arbitrary contract interaction. The transaction is signed and broadcast to the blockchain automatically."
     )
     def send_transaction(
         self,
@@ -94,27 +102,25 @@ class Engine(Service):
             "The amount of native currency to send, specified in wei (e.g., '1000000000000000000' for 1 ETH). For token transfers or contract interactions that don't need to send value, use '0'.",
         ],
         data: Annotated[
-            str | None,
+            str,
             "The hexadecimal transaction data payload for contract interactions (e.g., '0x23b872dd...'). For simple native currency transfers, leave this empty. For ERC20 transfers or contract calls, this contains the ABI-encoded function call.",
-        ] = None,
+        ],
+        chain_id: Annotated[
+            str,
+            "The numeric blockchain network ID to send the transaction on (e.g., '1' for Ethereum mainnet, '137' for Polygon). If not provided, uses the default chain ID configured in the Engine instance.",
+        ],
         backend_wallet_address: Annotated[
             str | None,
             "The sender wallet address to use (must be a wallet created through Engine). If not provided, uses the default backend wallet configured in the Engine instance.",
-        ] = None,
-        chain_id: Annotated[
-            str | None,
-            "The numeric blockchain network ID to send the transaction on (e.g., '1' for Ethereum mainnet, '137' for Polygon). If not provided, uses the default chain ID configured in the Engine instance.",
         ] = None,
     ) -> dict[str, Any]:
         """Send a transaction from a backend wallet."""
 
         payload = {
-            "to": to_address,
+            "toAddress": to_address,
             "value": value,
+            "data": data or "0x",
         }
-
-        if data:
-            payload["data"] = data
 
         chain_id = chain_id or self.chain_id
         backend_wallet_address = backend_wallet_address or self.backend_wallet_address
@@ -135,7 +141,7 @@ class Engine(Service):
         ],
     ) -> dict[str, Any]:
         """Get the status of a transaction by queue ID."""
-        return self._get(f"transaction/{queue_id}")
+        return self._get(f"transaction/status/{queue_id}")
 
     @tool(
         description="Call a read-only function on a smart contract to query its current state without modifying the blockchain or spending gas. Perfect for retrieving information like token balances, contract configuration, or any view/pure functions from Solidity contracts."
@@ -151,22 +157,21 @@ class Engine(Service):
             "The exact name of the function to call on the contract (e.g., 'balanceOf', 'totalSupply'). Must match the function name in the contract's ABI exactly, including correct capitalization.",
         ],
         function_args: Annotated[
-            list[Any] | None,
+            list[str | int | bool],
             "An ordered list of arguments to pass to the function (e.g., [address, tokenId]). Must match the types and order expected by the function. For functions with no parameters, use an empty list or None.",
-        ] = None,
+        ],
         chain_id: Annotated[
-            str | None,
+            str,
             "The numeric blockchain network ID where the contract is deployed (e.g., '1' for Ethereum mainnet, '137' for Polygon). If not provided, uses the default chain ID configured in the Engine instance.",
-        ] = None,
+        ],
     ) -> dict[str, Any]:
         """Read data from a smart contract."""
         payload = {
             "functionName": function_name,
             "args": function_args or [],
         }
-
         chain_id = chain_id or self.chain_id
-        return self._post(f"contract/{chain_id!s}/{contract_address}/read", payload)
+        return self._get(f"contract/{chain_id!s}/{contract_address}/read", payload)
 
     @tool(
         description="Execute a state-changing function on a smart contract by sending a transaction. This allows you to modify on-chain data, such as transferring tokens, minting NFTs, or updating contract configuration. The transaction is automatically signed by your backend wallet and submitted to the blockchain."
@@ -182,17 +187,17 @@ class Engine(Service):
             "The exact name of the function to call on the contract (e.g., 'mint', 'transfer', 'setApprovalForAll'). Must match the function name in the contract's ABI exactly, including correct capitalization.",
         ],
         function_args: Annotated[
-            list[Any] | None,
+            list[str | int | bool],
             "An ordered list of arguments to pass to the function (e.g., ['0x1234...', 5] for transferring 5 tokens to address '0x1234...'). Must match the types and order expected by the function. For functions with no parameters, use an empty list.",
-        ] = None,
+        ],
         value: Annotated[
-            str | None,
-            "The amount of native currency (ETH, MATIC, etc.) to send with the transaction, in wei (e.g., '1000000000000000000' for 1 ETH). Required for payable functions, use '0' for non-payable functions.",
-        ] = "0",
+            str,
+            "The amount of native currency (ETH, MATIC, etc.) to send with the transaction, in wei (e.g., '1000000000000000000' for 1 ETH). Required for payable functions, use '0' for non-payable functions. Default to '0'.",
+        ],
         chain_id: Annotated[
-            str | None,
+            str,
             "The numeric blockchain network ID where the contract is deployed (e.g., '1' for Ethereum mainnet, '137' for Polygon). If not provided, uses the default chain ID configured in the Engine instance.",
-        ] = None,
+        ],
     ) -> dict[str, Any]:
         """Write data to a smart contract."""
         payload: dict[str, Any] = {
@@ -200,7 +205,7 @@ class Engine(Service):
             "args": function_args or [],
         }
 
-        if value:
+        if value and value != "0":
             payload["txOverrides"] = {"value": value}
 
         chain_id = chain_id or self.chain_id
