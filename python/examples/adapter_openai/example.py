@@ -2,12 +2,17 @@ import asyncio
 import os
 
 from agents import Agent, Runner
-from thirdweb_ai import Insight, Nebula
+from thirdweb_ai import Engine, Insight, Nebula
 from thirdweb_ai.adapters.openai import get_agents_tools
 
 # Initialize Thirdweb Insight and Nebula with API key
 insight = Insight(secret_key=os.getenv("THIRDWEB_SECRET_KEY"), chain_id=1)
 nebula = Nebula(secret_key=os.getenv("THIRDWEB_SECRET_KEY"))
+engine = Engine(
+    engine_url=os.getenv("THIRDWEB_ENGINE_URL"),
+    engine_auth_jwt=os.getenv("THIRDWEB_ENGINE_AUTH_JWT"),
+    backend_wallet_address=os.getenv("THIRDWEB_BACKEND_WALLET_ADDRESS"),
+)
 
 
 async def main():
@@ -17,7 +22,9 @@ async def main():
     agent = Agent(
         name="Blockchain Assistant",
         instructions="You are a helpful blockchain assistant. Use the provided tools to interact with the blockchain.",
-        tools=get_agents_tools(insight.get_tools() + nebula.get_tools()),
+        tools=get_agents_tools(
+            insight.get_tools() + engine.get_tools() + nebula.get_tools()
+        ),
     )
 
     # Example queries to demonstrate capabilities
