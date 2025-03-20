@@ -366,13 +366,13 @@ yaml = ["pyyaml (>=6.0.1)"]
 
 [[package]]
 name = "pyright"
-version = "1.1.396"
+version = "1.1.397"
 description = "Command line wrapper for pyright"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pyright-1.1.396-py3-none-any.whl", hash = "sha256:c635e473095b9138c471abccca22b9fedbe63858e0b40d4fc4b67da041891844"},
-    {file = "pyright-1.1.396.tar.gz", hash = "sha256:142901f5908f5a0895be3d3befcc18bedcdb8cc1798deecaec86ef7233a29b03"},
+    {file = "pyright-1.1.397-py3-none-any.whl", hash = "sha256:2e93fba776e714a82b085d68f8345b01f91ba43e1ab9d513e79b70fc85906257"},
+    {file = "pyright-1.1.397.tar.gz", hash = "sha256:07530fd65a449e4b0b28dceef14be0d8e0995a7a5b1bb2f3f897c3e548451ce3"},
 ]
 
 [package.dependencies]
@@ -474,13 +474,13 @@ full = ["httpx (>=0.27.0,<0.29.0)", "itsdangerous", "jinja2", "python-multipart 
 
 [[package]]
 name = "thirdweb-ai"
-version = "0.1.3"
+version = "0.1.4"
 description = "thirdweb AI"
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "thirdweb_ai-0.1.3-py3-none-any.whl", hash = "sha256:e702d05ef3dd961d4fdd09ce68d5c8cfa74f116bcf3ac665da596bb8a475d551"},
-    {file = "thirdweb_ai-0.1.3.tar.gz", hash = "sha256:1f4f0519ce7b14621578a84cf5548e3d319c1315ebb4ec1dae57f794cd96b2a0"},
+    {file = "thirdweb_ai-0.1.4-py3-none-any.whl", hash = "sha256:76fe5afce31c6ea4c1dc8b2e385cbf387bcf5e85c5902ea737e40e471c3621b1"},
+    {file = "thirdweb_ai-0.1.4.tar.gz", hash = "sha256:f4626e5f656da9d5d081e5176a49fb05f336ef489f60e94f2cb9277fd2236e3a"},
 ]
 
 [package.dependencies]
@@ -534,4 +534,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.6.3)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "9952c3bda1f80915d9545fe4b007e70a2199bb2eb11818649eb9cb85190e9872"
+content-hash = "d569f2e663ee8ab42471e174961c3eb6148207acea9991a9f702da3bd2665f17"
