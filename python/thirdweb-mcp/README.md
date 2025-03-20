@@ -1,10 +1,10 @@
 # thirdweb MCP Server
 
-A Model Control Protocol (MCP) server implementation for thirdweb services integration. This server allows you to integrate thirdweb's tools with any MCP-compatible client.
+A Model Context Protocol (MCP) server implementation for thirdweb services integration. This server allows you to integrate thirdweb's tools with any MCP-compatible client.
 
 ## Overview
 
-thirdweb MCP provides a unified interface to access thirdweb's suite of blockchain tools and services through the standardized Model Control Protocol. It supports multiple communication transports and can be integrated with various thirdweb services:
+thirdweb MCP provides a unified interface to access thirdweb's suite of blockchain tools and services through the standardized Model Context Protocol. It supports multiple communication transports and can be integrated with various thirdweb services:
 
 - **Nebula**: Autonomous onchain execution - real-time on-chain analysis, code generation and contract interactions
 - **Insight**: Blockchain data analysis capabilities for real-time on-chain data
@@ -112,7 +112,7 @@ Read more on [MCP Quickstart](https://modelcontextprotocol.io/quickstart/user)
 
 ### Integration with MCP clients
 
-This server can be integrated with any client that supports the Model Control Protocol:
+This server can be integrated with any client that supports the Model Context Protocol:
 
 1. Run the MCP server with the appropriate configuration
 2. Connect your MCP client to the server using the selected transport (stdio or SSE)

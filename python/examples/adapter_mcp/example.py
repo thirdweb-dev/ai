@@ -7,7 +7,7 @@ from thirdweb_ai.adapters.mcp import add_fastmcp_tools
 
 def main():
     """
-    Example of using thirdweb_ai with MCP (Model Control Protocol) Server.
+    Example of using thirdweb_ai with MCP (Model Context Protocol) Server.
 
     This creates a server that provides blockchain tools via the MCP protocol,
     which can be used by compatible LLM clients.
