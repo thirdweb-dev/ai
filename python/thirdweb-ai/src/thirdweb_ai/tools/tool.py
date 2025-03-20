@@ -248,12 +248,12 @@ def tool(description: str | None = None, name: str | None = None, strict: bool =
             raise ValueError("Tool description is required")
 
         @functools.wraps(func)
-        def wrapper(cls: Any):
+        def wrapper(cls: Any, description: str | None = None, name: str | None = None):
             return FunctionTool(
                 func_definition=func,
                 func_execute=lambda _cls=cls, *args, **kwargs: func(_cls, *args, **kwargs),
-                description=func_description,
-                name=func_name,
+                description=description or func_description,
+                name=name or func_name,
                 strict=strict,
             )
 
