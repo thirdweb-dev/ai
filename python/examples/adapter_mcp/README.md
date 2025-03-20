@@ -1,6 +1,6 @@
-# thirdweb-ai with Model Control Protocol (MCP)
+# thirdweb-ai with Model Context Protocol (MCP)
 
-This example demonstrates how to integrate thirdweb-ai's blockchain tooling with the [Model Control Protocol (MCP)](https://github.com/modelcontextprotocol/python-sdk), a standard for model-agnostic tools and function calling.
+This example demonstrates how to integrate thirdweb-ai's blockchain tooling with the [Model Context Protocol (MCP)](https://github.com/modelcontextprotocol/python-sdk), a standard for model-agnostic tools and function calling.
 
 ## Overview
 
