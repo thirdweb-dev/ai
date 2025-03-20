@@ -19,6 +19,11 @@ def _get_openai_schema(schema: Any):
                 prop.pop("default", None)
                 _get_openai_schema(prop)
 
+    for field in ["anyOf", "oneOf", "allOf"]:
+        if field in schema:
+            for subschema in schema[field]:
+                _get_openai_schema(subschema)
+
     return schema
 
 
