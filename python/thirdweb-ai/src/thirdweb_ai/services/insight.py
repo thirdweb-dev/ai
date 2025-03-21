@@ -5,9 +5,27 @@ from thirdweb_ai.tools.tool import tool
 
 
 class Insight(Service):
-    def __init__(self, secret_key: str, chain_id: int | list[int]):
+    def __init__(self, secret_key: str, chain_id: int | str | list[int | str]):
         super().__init__(base_url="https://insight.thirdweb.com/v1", secret_key=secret_key)
-        self.chain_ids = chain_id if isinstance(chain_id, list) else [chain_id]
+        self.chain_ids = self._normalize_chain_ids(chain_id)
+
+    def _normalize_chain_ids(self, chain_id: int | str | list[int | str]) -> list[int]:
+        """Normalize chain IDs to always be a list of integers"""
+        if isinstance(chain_id, (int, str)):
+            chain_id = [chain_id]
+
+        normalized = []
+        for cid in chain_id:
+            if isinstance(cid, str):
+                # Remove quotes if present
+                cid = cid.strip('"\'')
+                try:
+                    normalized.append(int(cid))
+                except ValueError as e:
+                    raise ValueError(f"Invalid chain_id format: {cid}") from e
+            else:
+                normalized.append(int(cid))
+        return normalized
 
     @tool(
         description="Retrieve blockchain events with flexible filtering options. Use this to search for specific events or to analyze event patterns across multiple blocks."
