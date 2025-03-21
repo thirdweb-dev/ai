@@ -5,9 +5,10 @@ from thirdweb_ai.tools.tool import tool
 
 
 class Insight(Service):
-    def __init__(self, secret_key: str, chain_id: int | list[int]):
+    def __init__(self, secret_key: str, chain_id: int | str | list[int | str]):
         super().__init__(base_url="https://insight.thirdweb.com/v1", secret_key=secret_key)
         self.chain_ids = chain_id if isinstance(chain_id, list) else [chain_id]
+        self.chain_ids = self._normalize_chain_ids(self.chain_ids)
 
     def _normalize_chain_ids(self, chain_id: int | str | list[int | str]) -> list[int]:
         """Normalize chain IDs to always be a list of integers"""
