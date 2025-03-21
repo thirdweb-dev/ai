@@ -6,20 +6,26 @@ from thirdweb_ai.tools.tool import tool
 
 class Insight(Service):
     def __init__(self, secret_key: str, chain_id: int | str | list[int | str]):
-        super().__init__(base_url="https://insight.thirdweb.com/v1", secret_key=secret_key)
+        super().__init__(
+            base_url="https://insight.thirdweb.com/v1", secret_key=secret_key
+        )
         self.chain_ids = chain_id if isinstance(chain_id, list) else [chain_id]
         self.chain_ids = self._normalize_chain_ids(self.chain_ids)
 
-    def _normalize_chain_ids(self, chain_id: int | str | list[int | str]) -> list[int]:
+    def _normalize_chain_ids(
+        self, chain_id: int | str | list[int | str] | None
+    ) -> list[int] | None:
         """Normalize chain IDs to always be a list of integers"""
         if isinstance(chain_id, (int, str)):
             chain_id = [chain_id]
+        else:
+            return None
 
         normalized = []
         for cid in chain_id:
             if isinstance(cid, str):
                 # Remove quotes if present
-                cid = cid.strip('"\'')
+                cid = cid.strip("\"'")
                 try:
                     normalized.append(int(cid))
                 except ValueError as e:
@@ -34,15 +40,19 @@ class Insight(Service):
     def get_all_events(
         self,
         chain: Annotated[
-            list[int] | int | None,
+            list[int | str] | int | str | None,
             "Chain ID(s) to query (e.g., 1 for Ethereum Mainnet, 137 for Polygon). Specify multiple IDs as a list [1, 137] for cross-chain queries (max 5).",
         ] = None,
         address: Annotated[
             str | None,
             "Contract address to filter events by (e.g., '0x1234...'). Only return events emitted by this contract.",
         ] = None,
-        block_number_gte: Annotated[int | None, "Minimum block number to start querying from (inclusive)."] = None,
-        block_number_lt: Annotated[int | None, "Maximum block number to query up to (exclusive)."] = None,
+        block_number_gte: Annotated[
+            int | None, "Minimum block number to start querying from (inclusive)."
+        ] = None,
+        block_number_lt: Annotated[
+            int | None, "Maximum block number to query up to (exclusive)."
+        ] = None,
         transaction_hash: Annotated[
             str | None,
             "Specific transaction hash to filter events by (e.g., '0xabc123...'). Useful for examining events in a particular transaction.",
@@ -52,10 +62,12 @@ class Insight(Service):
             "Filter by event signature hash (first topic). For example, '0xa6697e974e6a320f454390be03f74955e8978f1a6971ea6730542e37b66179bc' for Transfer events.",
         ] = None,
         limit: Annotated[
-            int | None, "Maximum number of events to return per request. Default is 20, adjust for pagination."
+            int | None,
+            "Maximum number of events to return per request. Default is 20, adjust for pagination.",
         ] = None,
         page: Annotated[
-            int | None, "Page number for paginated results, starting from 0. Use with limit parameter."
+            int | None,
+            "Page number for paginated results, starting from 0. Use with limit parameter.",
         ] = None,
         sort_order: Annotated[
             str | None,
@@ -67,7 +79,7 @@ class Insight(Service):
             "sort_order": sort_order if sort_order in ["asc", "desc"] else "desc",
             "decode": True,
         }
-        chain = chain or self.chain_ids
+        chain = self._normalize_chain_ids(chain) or self.chain_ids
         if chain:
             params["chain"] = chain
         if address:
@@ -92,10 +104,11 @@ class Insight(Service):
     def get_contract_events(
         self,
         contract_address: Annotated[
-            str, "The contract address to query events for (e.g., '0x1234...'). Must be a valid Ethereum address."
+            str,
+            "The contract address to query events for (e.g., '0x1234...'). Must be a valid Ethereum address.",
         ],
         chain: Annotated[
-            list[int] | int | None,
+            list[int | str] | int | str | None,
             "Chain ID(s) to query (e.g., 1 for Ethereum Mainnet, 137 for Polygon). Specify multiple IDs as a list for cross-chain queries (max 5).",
         ] = None,
         block_number_gte: Annotated[
@@ -107,7 +120,8 @@ class Insight(Service):
             "Filter by event signature hash (first topic). For example, Transfer event has a specific signature hash.",
         ] = None,
         limit: Annotated[
-            int | None, "Maximum number of events to return per request. Default is 20, increase for more results."
+            int | None,
+            "Maximum number of events to return per request. Default is 20, increase for more results.",
         ] = None,
         page: Annotated[
             int | None,
@@ -123,9 +137,9 @@ class Insight(Service):
             "sort_order": sort_order if sort_order in ["asc", "desc"] else "desc",
             "decode": True,
         }
-        chain = chain or self.chain_ids
-        if chain:
-            params["chain"] = chain
+        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
+        if chain_norm:
+            params["chain"] = chain_norm
         if block_number_gte:
             params["filter_block_number_gte"] = block_number_gte
         if topic_0:
@@ -142,7 +156,7 @@ class Insight(Service):
     def get_all_transactions(
         self,
         chain: Annotated[
-            list[int] | int | None,
+            list[int | str] | int | str | None,
             "Chain ID(s) to query (e.g., 1 for Ethereum, 137 for Polygon). Specify multiple IDs as a list for cross-chain queries.",
         ] = None,
         from_address: Annotated[
@@ -200,7 +214,7 @@ class Insight(Service):
             "The wallet address to get ERC20 token balances for (e.g., '0x1234...'). Must be a valid Ethereum address.",
         ],
         chain: Annotated[
-            list[int] | int | None,
+            list[int | str] | int | str | None,
             "Chain ID(s) to query (e.g., 1 for Ethereum, 137 for Polygon). Specify multiple IDs as a list for cross-chain queries.",
         ] = None,
         include_price: Annotated[
@@ -213,9 +227,9 @@ class Insight(Service):
         ] = None,
     ) -> dict[str, Any]:
         params: dict[str, Any] = {}
-        chain = chain or self.chain_ids
-        if chain:
-            params["chain"] = chain
+        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
+        if chain_norm:
+            params["chain"] = chain_norm
         if include_price:
             params["include_price"] = include_price
         if include_spam:
@@ -232,11 +246,12 @@ class Insight(Service):
             "The wallet address to get ERC721 NFTs for (e.g., '0x1234...'). Returns all NFTs owned by this address.",
         ],
         chain: Annotated[
-            list[int] | int | None,
+            list[int | str] | int | str | None,
             "Chain ID(s) to query (e.g., 1 for Ethereum, 137 for Polygon). Specify multiple IDs as a list for cross-chain queries.",
         ] = None,
         include_price: Annotated[
-            bool | None, "Set to True to include estimated prices for NFTs where available. Useful for valuation."
+            bool | None,
+            "Set to True to include estimated prices for NFTs where available. Useful for valuation.",
         ] = None,
         include_spam: Annotated[
             bool | None,
@@ -244,9 +259,9 @@ class Insight(Service):
         ] = None,
     ) -> dict[str, Any]:
         params = {}
-        chain = chain or self.chain_ids
-        if chain:
-            params["chain"] = chain
+        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
+        if chain_norm:
+            params["chain"] = chain_norm
         if include_price:
             params["include_price"] = include_price
         if include_spam:
@@ -263,11 +278,12 @@ class Insight(Service):
             "The wallet address to get ERC1155 tokens for (e.g., '0x1234...'). Returns all token IDs and their quantities.",
         ],
         chain: Annotated[
-            list[int] | int | None,
+            list[int | str] | int | str | None,
             "Chain ID(s) to query (e.g., 1 for Ethereum, 137 for Polygon). Specify multiple IDs as a list for cross-chain queries.",
         ] = None,
         include_price: Annotated[
-            bool | None, "Set to True to include estimated prices for tokens where available. Useful for valuation."
+            bool | None,
+            "Set to True to include estimated prices for tokens where available. Useful for valuation.",
         ] = None,
         include_spam: Annotated[
             bool | None,
@@ -275,9 +291,9 @@ class Insight(Service):
         ] = None,
     ) -> dict[str, Any]:
         params = {}
-        chain = chain or self.chain_ids
-        if chain:
-            params["chain"] = chain
+        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
+        if chain_norm:
+            params["chain"] = chain_norm
         if include_price:
             params["include_price"] = include_price
         if include_spam:
@@ -294,14 +310,14 @@ class Insight(Service):
             "List of token contract addresses to get prices for (e.g., ['0x1234...', '0x5678...']). Can include ERC20 tokens. Use '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' for native tokens (ETH, POL, MATIC, etc.).",
         ],
         chain: Annotated[
-            list[int] | int | None,
+            list[int | str] | int | str | None,
             "Chain ID(s) where the tokens exist (e.g., 1 for Ethereum, 137 for Polygon). Must match the token network.",
         ] = None,
     ) -> dict[str, Any]:
         params: dict[str, Any] = {"address": token_addresses}
-        chain = chain or self.chain_ids
-        if chain:
-            params["chain"] = chain
+        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
+        if chain_norm:
+            params["chain"] = chain_norm
         return self._get("tokens/price", params)
 
     @tool(
@@ -314,14 +330,14 @@ class Insight(Service):
             "The contract address to get metadata for (e.g., '0x1234...'). Works for tokens and other contract types.",
         ],
         chain: Annotated[
-            list[int] | int | None,
+            list[int | str] | int | str | None,
             "Chain ID(s) where the contract is deployed (e.g., 1 for Ethereum). Specify the correct network.",
         ] = None,
     ) -> dict[str, Any]:
         params = {}
-        chain = chain or self.chain_ids
-        if chain:
-            params["chain"] = chain
+        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
+        if chain_norm:
+            params["chain"] = chain_norm
         return self._get(f"contracts/metadata/{contract_address}", params)
 
     @tool(
@@ -330,14 +346,15 @@ class Insight(Service):
     def get_nfts(
         self,
         contract_address: Annotated[
-            str, "The NFT contract address to query (e.g., '0x1234...'). Must be an ERC721 or ERC1155 contract."
+            str,
+            "The NFT contract address to query (e.g., '0x1234...'). Must be an ERC721 or ERC1155 contract.",
         ],
         token_id: Annotated[
             str | None,
             "Specific token ID to query (e.g., '42'). If provided, returns data only for this NFT. Otherwise returns collection data.",
         ] = None,
         chain: Annotated[
-            list[int] | int | None,
+            list[int | str] | int | str | None,
             "Chain ID(s) where the NFT contract is deployed (e.g., 1 for Ethereum). Specify the correct network.",
         ] = None,
         include_metadata: Annotated[
@@ -346,9 +363,9 @@ class Insight(Service):
         ] = None,
     ) -> dict[str, Any]:
         params = {}
-        chain = chain or self.chain_ids
-        if chain:
-            params["chain"] = chain
+        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
+        if chain_norm:
+            params["chain"] = chain_norm
         if include_metadata:
             params["include_metadata"] = include_metadata
 
@@ -370,7 +387,7 @@ class Insight(Service):
             "Specific token ID to query owners for (e.g., '42'). If provided, shows all owners of this specific NFT.",
         ] = None,
         chain: Annotated[
-            list[int] | int | None,
+            list[int | str] | int | str | None,
             "Chain ID(s) where the NFT contract is deployed (e.g., 1 for Ethereum). Specify the correct network.",
         ] = None,
         limit: Annotated[
@@ -383,9 +400,9 @@ class Insight(Service):
         ] = None,
     ) -> dict[str, Any]:
         params = {}
-        chain = chain or self.chain_ids
-        if chain:
-            params["chain"] = chain
+        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
+        if chain_norm:
+            params["chain"] = chain_norm
         if limit:
             params["limit"] = limit
         if page:
@@ -409,7 +426,7 @@ class Insight(Service):
             "Specific token ID to query transfers for (e.g., '42'). If provided, only shows transfers of this NFT.",
         ] = None,
         chain: Annotated[
-            list[int] | int | None,
+            list[int | str] | int | str | None,
             "Chain ID(s) to query (e.g., 1 for Ethereum). Specify the chain where the NFT contract is deployed.",
         ] = None,
         limit: Annotated[
@@ -422,9 +439,9 @@ class Insight(Service):
         ] = None,
     ) -> dict[str, Any]:
         params = {}
-        chain = chain or self.chain_ids
-        if chain:
-            params["chain"] = chain
+        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
+        if chain_norm:
+            params["chain"] = chain_norm
         if limit:
             params["limit"] = limit
         if page:
@@ -444,12 +461,12 @@ class Insight(Service):
             "Any blockchain input data: block number, transaction or block hash, address, event signature or function selector",
         ],
         chain: Annotated[
-            list[int] | int | None,
+            list[int | str] | int | str | None,
             "Chain ID(s) to query (e.g., 1 for Ethereum). ENS is primarily on Ethereum mainnet.",
         ] = None,
     ) -> dict[str, Any]:
         params = {}
-        chain = chain or self.chain_ids
-        if chain:
-            params["chain"] = chain
+        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
+        if chain_norm:
+            params["chain"] = chain_norm
         return self._get(f"resolve/{input_data}", params)
