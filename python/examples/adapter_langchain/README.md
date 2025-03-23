@@ -16,8 +16,8 @@ First, ensure you have Python 3.10+ installed. Then install the required package
 # Using pip
 pip install "thirdweb-ai[langchain]"
 
-# Using Poetry
-poetry add "thirdweb-ai[langchain]"
+# Using uv
+uv add "thirdweb-ai[langchain]"
 ```
 
 ## Usage
