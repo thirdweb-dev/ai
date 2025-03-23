@@ -1,38 +1,15 @@
 from typing import Annotated, Any
 
+from thirdweb_ai.common.utils import normalize_chain_id
 from thirdweb_ai.services.service import Service
 from thirdweb_ai.tools.tool import tool
 
 
 class Insight(Service):
     def __init__(self, secret_key: str, chain_id: int | str | list[int | str]):
-        super().__init__(
-            base_url="https://insight.thirdweb.com/v1", secret_key=secret_key
-        )
-        self.chain_ids = chain_id if isinstance(chain_id, list) else [chain_id]
-        self.chain_ids = self._normalize_chain_ids(self.chain_ids)
-
-    def _normalize_chain_ids(
-        self, chain_id: int | str | list[int | str] | None
-    ) -> list[int] | None:
-        """Normalize chain IDs to always be a list of integers"""
-        if isinstance(chain_id, (int, str)):
-            chain_id = [chain_id]
-        else:
-            return None
-
-        normalized = []
-        for cid in chain_id:
-            if isinstance(cid, str):
-                # Remove quotes if present
-                cid = cid.strip("\"'")
-                try:
-                    normalized.append(int(cid))
-                except ValueError as e:
-                    raise ValueError(f"Invalid chain_id format: {cid}") from e
-            else:
-                normalized.append(int(cid))
-        return normalized
+        super().__init__(base_url="https://insight.thirdweb.com/v1", secret_key=secret_key)
+        normalized = normalize_chain_id(chain_id)
+        self.chain_ids = normalized if isinstance(normalized, list) else [normalized]
 
     @tool(
         description="Retrieve blockchain events with flexible filtering options. Use this to search for specific events or to analyze event patterns across multiple blocks."
@@ -47,12 +24,8 @@ class Insight(Service):
             str | None,
             "Contract address to filter events by (e.g., '0x1234...'). Only return events emitted by this contract.",
         ] = None,
-        block_number_gte: Annotated[
-            int | None, "Minimum block number to start querying from (inclusive)."
-        ] = None,
-        block_number_lt: Annotated[
-            int | None, "Maximum block number to query up to (exclusive)."
-        ] = None,
+        block_number_gte: Annotated[int | None, "Minimum block number to start querying from (inclusive)."] = None,
+        block_number_lt: Annotated[int | None, "Maximum block number to query up to (exclusive)."] = None,
         transaction_hash: Annotated[
             str | None,
             "Specific transaction hash to filter events by (e.g., '0xabc123...'). Useful for examining events in a particular transaction.",
@@ -79,9 +52,9 @@ class Insight(Service):
             "sort_order": sort_order if sort_order in ["asc", "desc"] else "desc",
             "decode": True,
         }
-        chain = self._normalize_chain_ids(chain) or self.chain_ids
-        if chain:
-            params["chain"] = chain
+        normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
+        if normalized_chain:
+            params["chain"] = normalized_chain
         if address:
             params["filter_address"] = address
         if block_number_gte:
@@ -137,9 +110,9 @@ class Insight(Service):
             "sort_order": sort_order if sort_order in ["asc", "desc"] else "desc",
             "decode": True,
         }
-        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
-        if chain_norm:
-            params["chain"] = chain_norm
+        normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
+        if normalized_chain:
+            params["chain"] = normalized_chain
         if block_number_gte:
             params["filter_block_number_gte"] = block_number_gte
         if topic_0:
@@ -189,9 +162,9 @@ class Insight(Service):
             "sort_order": sort_order if sort_order in ["asc", "desc"] else "desc",
             "decode": True,
         }
-        chain = chain or self.chain_ids
-        if chain:
-            params["chain"] = chain
+        normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
+        if normalized_chain:
+            params["chain"] = normalized_chain
         if from_address:
             params["filter_from_address"] = from_address
         if to_address:
@@ -227,9 +200,9 @@ class Insight(Service):
         ] = None,
     ) -> dict[str, Any]:
         params: dict[str, Any] = {}
-        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
-        if chain_norm:
-            params["chain"] = chain_norm
+        normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
+        if normalized_chain:
+            params["chain"] = normalized_chain
         if include_price:
             params["include_price"] = include_price
         if include_spam:
@@ -259,9 +232,9 @@ class Insight(Service):
         ] = None,
     ) -> dict[str, Any]:
         params = {}
-        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
-        if chain_norm:
-            params["chain"] = chain_norm
+        normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
+        if normalized_chain:
+            params["chain"] = normalized_chain
         if include_price:
             params["include_price"] = include_price
         if include_spam:
@@ -291,9 +264,9 @@ class Insight(Service):
         ] = None,
     ) -> dict[str, Any]:
         params = {}
-        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
-        if chain_norm:
-            params["chain"] = chain_norm
+        normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
+        if normalized_chain:
+            params["chain"] = normalized_chain
         if include_price:
             params["include_price"] = include_price
         if include_spam:
@@ -315,9 +288,9 @@ class Insight(Service):
         ] = None,
     ) -> dict[str, Any]:
         params: dict[str, Any] = {"address": token_addresses}
-        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
-        if chain_norm:
-            params["chain"] = chain_norm
+        normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
+        if normalized_chain:
+            params["chain"] = normalized_chain
         return self._get("tokens/price", params)
 
     @tool(
@@ -335,9 +308,9 @@ class Insight(Service):
         ] = None,
     ) -> dict[str, Any]:
         params = {}
-        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
-        if chain_norm:
-            params["chain"] = chain_norm
+        normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
+        if normalized_chain:
+            params["chain"] = normalized_chain
         return self._get(f"contracts/metadata/{contract_address}", params)
 
     @tool(
@@ -363,9 +336,9 @@ class Insight(Service):
         ] = None,
     ) -> dict[str, Any]:
         params = {}
-        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
-        if chain_norm:
-            params["chain"] = chain_norm
+        normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
+        if normalized_chain:
+            params["chain"] = normalized_chain
         if include_metadata:
             params["include_metadata"] = include_metadata
 
@@ -400,9 +373,9 @@ class Insight(Service):
         ] = None,
     ) -> dict[str, Any]:
         params = {}
-        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
-        if chain_norm:
-            params["chain"] = chain_norm
+        normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
+        if normalized_chain:
+            params["chain"] = normalized_chain
         if limit:
             params["limit"] = limit
         if page:
@@ -439,9 +412,9 @@ class Insight(Service):
         ] = None,
     ) -> dict[str, Any]:
         params = {}
-        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
-        if chain_norm:
-            params["chain"] = chain_norm
+        normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
+        if normalized_chain:
+            params["chain"] = normalized_chain
         if limit:
             params["limit"] = limit
         if page:
@@ -466,7 +439,7 @@ class Insight(Service):
         ] = None,
     ) -> dict[str, Any]:
         params = {}
-        chain_norm = self._normalize_chain_ids(chain) if chain else self.chain_ids
-        if chain_norm:
-            params["chain"] = chain_norm
+        normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
+        if normalized_chain:
+            params["chain"] = normalized_chain
         return self._get(f"resolve/{input_data}", params)
