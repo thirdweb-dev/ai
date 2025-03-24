@@ -1,11 +1,97 @@
 name: Publish thirdweb MCP to PyPI
 
 on:
+  push:
+    tags:
+      - 'thirdweb-mcp-v*'
   workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Type of release (patch, minor, major)'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 jobs:
-  deploy-pypi-thirdweb-mcp:
+  check-and-build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./python/thirdweb-mcp
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      
+      - name: Install the project
+        run: uv sync
+      
+      - name: Run linting
+        run: uv run ruff check .
+      
+      - name: Run type checking
+        run: uv run pyright
+
+  prepare-release:
+    runs-on: ubuntu-latest
+    needs: check-and-build
+    if: github.event_name == 'workflow_dispatch'
+    defaults:
+      run:
+        working-directory: ./python/thirdweb-mcp
+    outputs:
+      version: ${{ steps.semantic_release.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      
+      - name: Install the project with development dependencies
+        run: uv sync --all
+      
+      - name: Set up Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+      
+      - name: Run semantic release
+        id: semantic_release
+        run: |
+          uv run semantic-release --${{ github.event.inputs.release_type }}
+          echo "version=$(grep -Po '(?<=__version__ = ")[^"]*' src/mcp.py)" >> $GITHUB_OUTPUT
+      
+      - name: Create tag
+        run: |
+          git tag -a thirdweb-mcp-v${{ steps.semantic_release.outputs.version }} -m "Release thirdweb-mcp v${{ steps.semantic_release.outputs.version }}"
+          git push origin thirdweb-mcp-v${{ steps.semantic_release.outputs.version }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [check-and-build, prepare-release]
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
     defaults:
       run:
         working-directory: ./python/thirdweb-mcp
@@ -15,28 +101,33 @@ jobs:
     permissions:
       contents: read
       id-token: write
-
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-    - name: Install uv
-      uses: astral-sh/setup-uv@22695119d769bdb6f7032ad67b9bca0ef8c4a174 # v5
-
-    - name: Install Python
-      uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
-      with:
-        enable-cache: true
-        cache-dependency-glob: "uv.lock" # Update cache if uv.lock changes
-
-    - name: Install the project
-      run: uv sync
-
-    - name: Build package
-      run: uv build
-
-    - name: Publish package
-      uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_KEY }}
-        packages-dir: python/thirdweb-mcp/dist/
+      - uses: actions/checkout@v4
+        if: github.event_name == 'push'
+      
+      - uses: actions/checkout@v4
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          ref: thirdweb-mcp-v${{ needs.prepare-release.outputs.version }}
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      
+      - name: Install the project
+        run: uv sync
+      
+      - name: Build package
+        run: uv build
+      
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_KEY }}
+          packages-dir: python/thirdweb-mcp/dist/

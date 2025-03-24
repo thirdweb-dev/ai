@@ -1,0 +1,61 @@
+name: Synchronize Dependency Versions
+
+on:
+  workflow_run:
+    workflows: ["Publish thirdweb AI to PyPI"]
+    types:
+      - completed
+
+jobs:
+  update-dependencies:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Extract thirdweb-ai version
+        id: get_ai_version
+        run: |
+          REF_NAME=${{ github.event.workflow_run.head_branch }}
+          if [[ $REF_NAME == thirdweb-ai-v* ]]; then
+            VERSION=${REF_NAME#thirdweb-ai-v}
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "Found thirdweb-ai version: $VERSION"
+          else
+            echo "No valid thirdweb-ai version tag found"
+            exit 0
+          fi
+      
+      - name: Set up Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+      
+      - name: Create branch for dependency update
+        if: steps.get_ai_version.outputs.version != ''
+        run: |
+          NEW_BRANCH="update-deps/thirdweb-ai-v${{ steps.get_ai_version.outputs.version }}"
+          git checkout -b $NEW_BRANCH
+      
+      - name: Update thirdweb-mcp dependency on thirdweb-ai
+        if: steps.get_ai_version.outputs.version != ''
+        run: |
+          # Update dependency in thirdweb-mcp
+          sed -i 's/thirdweb-ai\[mcp\]==[0-9.]\+/thirdweb-ai\[mcp\]==${{ steps.get_ai_version.outputs.version }}/g' ./python/thirdweb-mcp/pyproject.toml
+          
+          git add ./python/thirdweb-mcp/pyproject.toml
+          git commit -m "chore: update thirdweb-mcp to use thirdweb-ai v${{ steps.get_ai_version.outputs.version }}"
+          git push origin update-deps/thirdweb-ai-v${{ steps.get_ai_version.outputs.version }}
+      
+      - name: Create pull request
+        if: steps.get_ai_version.outputs.version != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --title "Update thirdweb-mcp to use thirdweb-ai v${{ steps.get_ai_version.outputs.version }}" \
+            --body "This PR updates the thirdweb-mcp dependency to use the latest version of thirdweb-ai (v${{ steps.get_ai_version.outputs.version }})." \
+            --base main \
+            --head update-deps/thirdweb-ai-v${{ steps.get_ai_version.outputs.version }}
