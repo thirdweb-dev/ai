@@ -15,7 +15,7 @@ thirdweb MCP provides a unified interface to access thirdweb's suite of blockcha
 ### Prerequisites
 
 - Python 3.10 or higher
-- Poetry (recommended for dependency management)
+- uv
 
 ### Run with uvx
 ```bash
@@ -37,7 +37,7 @@ THIRDWEB_SECRET_KEY=... \
 ```bash
 git clone https://github.com/thirdweb-dev/ai.git thirdweb-ai
 cd thirdweb-ai/python/thirdweb-mcp
-poetry install
+uv sync
 ```
 
 ## Configuration

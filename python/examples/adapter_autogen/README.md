@@ -16,8 +16,8 @@ First, ensure you have Python 3.10+ installed. Then install the required package
 # Using pip
 pip install "thirdweb-ai[autogen]"
 
-# Using Poetry
-poetry add "thirdweb-ai[autogen]"
+# Using uv
+uv add "thirdweb-ai[autogen]"
 ```
 
 ## Usage

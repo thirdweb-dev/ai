@@ -16,8 +16,8 @@ First, ensure you have Python 3.10+ installed. Then install the required package
 # Using pip
 pip install "thirdweb-ai[llama_index]"
 
-# Using Poetry
-poetry add "thirdweb-ai[llama_index]"
+# Using uv
+uv add "thirdweb-ai[llama_index]"
 ```
 
 ## Usage

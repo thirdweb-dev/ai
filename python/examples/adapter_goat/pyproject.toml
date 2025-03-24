@@ -1,22 +1,24 @@
-[tool.poetry]
+[project]
 name = "thirdweb-ai-examples-goat"
 version = "0.1.0"
 description = "Example of using thirdweb_ai with GOAT SDK"
-authors = ["thirdweb <support@thirdweb.com>"]
-package-mode = false
+authors = [{ name = "thirdweb", email = "support@thirdweb.com" }]
+requires-python = "~=3.10"
+dependencies = [
+    "thirdweb-ai[goat]",
+    "goat-sdk>=0.1.0,<0.2",
+    "goat-sdk-adapter-langchain>=0.1.0,<0.2",
+    "goat-sdk-wallet-evm>=0.1.1,<0.2",
+    "goat-sdk-wallet-web3>=0.1.0,<0.2",
+    "web3>=6.20.3",
+    "langchain>=0.3.0,<0.4",
+    "langchain-openai>=0.2.0,<0.3",
+    "goat-sdk-plugin-erc20>=0.1.1,<0.2",
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-thirdweb-ai = {version = "*", extras = ["goat"]}
-goat-sdk = "^0.1.0"
-goat-sdk-adapter-langchain = "^0.1.0"
-goat-sdk-wallet-evm = "^0.1.1"
-goat-sdk-wallet-web3 = "^0.1.0"
-web3 = ">=6.20.3"
-langchain = "^0.3.0"
-langchain-openai = "^0.2.0"
-goat-sdk-plugin-erc20 = "^0.1.1"
+[tool.uv]
+package = false
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api" 
+requires = ["hatchling"]
+build-backend = "hatchling.build"

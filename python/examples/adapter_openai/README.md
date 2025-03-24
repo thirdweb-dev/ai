@@ -16,8 +16,8 @@ First, ensure you have Python 3.10+ installed. Then install the required package
 # Using pip
 pip install "thirdweb-ai[openai]"
 
-# Using Poetry
-poetry add "thirdweb-ai[openai]"
+# Using uv
+uv add "thirdweb-ai[openai]"
 ```
 
 ## Usage
