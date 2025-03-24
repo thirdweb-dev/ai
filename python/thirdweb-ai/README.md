@@ -146,10 +146,46 @@ def adapt_to_my_framework(tools: list[Tool]):
 
 This project is licensed under the Apache License 2.0 - see the LICENSE file for details.
 
-## Contributing
+## Development and Testing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+### Setting up development environment
 
-## Support
+```bash
+# Clone the repository
+git clone https://github.com/thirdweb-dev/ai.git
+cd ai/python/thirdweb-ai
 
-If you need help or have questions, please contact [support@thirdweb.com](mailto:support@thirdweb.com).
+# Install dependencies with UV
+uv sync
+```
+
+### Running tests
+
+We use pytest for testing. You can run the tests with:
+
+```bash
+# Run all tests
+uv run pytest
+
+# Run tests with verbose output
+uv run pytest -v
+
+# Run specific test file
+uv run pytest tests/common/test_utils.py
+
+# Run tests with coverage report
+uv run pytest --cov=thirdweb_ai
+
+# Run tests and generate HTML coverage report
+uv run pytest --cov=thirdweb_ai --cov-report=html
+```
+
+### Linting and Type Checking
+
+```bash
+# Run the ruff linter
+uv run ruff check .
+
+# Run type checking with pyright
+uv run pyright
+```
