@@ -155,8 +155,8 @@ This project is licensed under the Apache License 2.0 - see the LICENSE file for
 git clone https://github.com/thirdweb-dev/ai.git
 cd ai/python/thirdweb-ai
 
-# Install dependencies with Poetry
-poetry install -E all
+# Install dependencies with UV
+uv sync
 ```
 
 ### Running tests
@@ -165,27 +165,27 @@ We use pytest for testing. You can run the tests with:
 
 ```bash
 # Run all tests
-poetry run pytest
+uv run pytest
 
 # Run tests with verbose output
-poetry run pytest -v
+uv run pytest -v
 
 # Run specific test file
-poetry run pytest tests/common/test_utils.py
+uv run pytest tests/common/test_utils.py
 
 # Run tests with coverage report
-poetry run pytest --cov=thirdweb_ai
+uv run pytest --cov=thirdweb_ai
 
 # Run tests and generate HTML coverage report
-poetry run pytest --cov=thirdweb_ai --cov-report=html
+uv run pytest --cov=thirdweb_ai --cov-report=html
 ```
 
 ### Linting and Type Checking
 
 ```bash
 # Run the ruff linter
-poetry run ruff check .
+uv run ruff check .
 
 # Run type checking with pyright
-poetry run pyright
+uv run pyright
 ```
