@@ -6,7 +6,7 @@ def extract_digits(value: int | str) -> int:
     digit_match = re.search(r"\d+", value_str)
 
     if not digit_match:
-        raise ValueError(f"Chain ID '{value}' does not contain any digits")
+        raise ValueError(f"Input '{value}' does not contain any digits")
 
     extracted_digits = digit_match.group()
 
@@ -18,14 +18,14 @@ def extract_digits(value: int | str) -> int:
 
 
 def normalize_chain_id(
-    chain_id: int | str | list[int | str] | None,
+    in_value: int | str | list[int | str] | None,
 ) -> int | list[int] | None:
-    """Normalize chain IDs to integers."""
+    """Normalize str values integers."""
 
-    if chain_id is None:
+    if in_value is None:
         return None
 
-    if isinstance(chain_id, list):
-        return [extract_digits(c) for c in chain_id]
+    if isinstance(in_value, list):
+        return [extract_digits(c) for c in in_value]
 
-    return extract_digits(chain_id)
+    return extract_digits(in_value)
