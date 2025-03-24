@@ -3256,6 +3256,8 @@ source = { editable = "." }
 dependencies = [
     { name = "httpx" },
     { name = "jsonref" },
+    { name = "langchain-core" },
+    { name = "llama-index-core" },
     { name = "pydantic" },
 ]
 
@@ -3319,8 +3321,10 @@ requires-dist = [
     { name = "goat-sdk", marker = "extra == 'goat'", specifier = ">=0.1.0" },
     { name = "httpx", specifier = ">=0.28.1,<0.29" },
     { name = "jsonref", specifier = ">=1.1.0,<2" },
+    { name = "langchain-core", specifier = ">=0.3.47" },
     { name = "langchain-core", marker = "extra == 'all'", specifier = ">=0.3.0" },
     { name = "langchain-core", marker = "extra == 'langchain'", specifier = ">=0.3.0" },
+    { name = "llama-index-core", specifier = ">=0.12.25" },
     { name = "llama-index-core", marker = "extra == 'all'", specifier = ">=0.12.0" },
     { name = "llama-index-core", marker = "extra == 'llama-index'", specifier = ">=0.12.0" },
     { name = "mcp", marker = "extra == 'all'", specifier = ">=1.3.0" },

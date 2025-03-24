@@ -146,15 +146,6 @@ def adapt_to_my_framework(tools: list[Tool]):
 
 This project is licensed under the Apache License 2.0 - see the LICENSE file for details.
 
-## Development and Testing
-
-### Setting up development environment
-
-```bash
-# Clone the repository
-git clone https://github.com/thirdweb-dev/ai.git
-cd ai/python/thirdweb-ai
-
 # Install dependencies with UV
 uv sync
 ```
@@ -189,3 +180,27 @@ uv run ruff check .
 # Run type checking with pyright
 uv run pyright
 ```
+
+## Development and Testing
+
+### Setting up development environment
+
+```bash
+# Clone the repository
+git clone https://github.com/thirdweb-dev/ai.git
+cd ai/python/thirdweb-ai
+=======
+### Testing
+
+Tests are located in the `tests/` directory. The testing approach is designed to handle the various optional dependencies:
+
+```bash
+# Run all available tests
+python -m pytest
+
+# Run with coverage
+python -m pytest --cov=thirdweb_ai
+```
+
+See [TESTING.md](TESTING.md) for more detailed information on the testing approach.
+
