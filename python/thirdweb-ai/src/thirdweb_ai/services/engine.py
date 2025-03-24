@@ -1,6 +1,6 @@
 from typing import Annotated, Any
 
-from thirdweb_ai.common.utils import normalize_chain_id
+from thirdweb_ai.common.utils import extract_digits, normalize_chain_id
 from thirdweb_ai.services.service import Service
 from thirdweb_ai.tools.tool import tool
 
@@ -68,7 +68,9 @@ class Engine(Service):
         ] = 20,
     ) -> dict[str, Any]:
         """Get all backend wallets."""
-        return self._get("backend-wallet/get-all", params={"page": page, "limit": limit})
+        return self._get(
+            "backend-wallet/get-all", params={"page": page, "limit": limit}
+        )
 
     @tool(
         description="Check the current balance of a backend wallet on a specific blockchain. Returns the balance in wei (smallest unit) for both native currency (ETH, MATIC, etc.) and ERC20 tokens. Essential for verifying if a wallet has sufficient funds before sending transactions."
@@ -87,7 +89,9 @@ class Engine(Service):
         """Get wallet balance for native or ERC20 tokens."""
         normalized_chain = normalize_chain_id(chain_id) or self.chain_id
         backend_wallet_address = backend_wallet_address or self.backend_wallet_address
-        return self._get(f"backend-wallet/{normalized_chain}/{backend_wallet_address}/get-balance")
+        return self._get(
+            f"backend-wallet/{normalized_chain}/{backend_wallet_address}/get-balance"
+        )
 
     @tool(
         description="Send an on-chain transaction. This powerful function can transfer native currency (ETH, MATIC), ERC20 tokens, or execute any arbitrary contract interaction. The transaction is signed and broadcast to the blockchain automatically."
@@ -117,9 +121,12 @@ class Engine(Service):
     ) -> dict[str, Any]:
         """Send a transaction from a backend wallet."""
 
+        normalized_value = extract_digits(value)
+        hex_value = hex(normalized_value)
+
         payload = {
             "toAddress": to_address,
-            "value": value,
+            "value": hex_value,
             "data": data or "0x",
         }
 
@@ -172,7 +179,9 @@ class Engine(Service):
             "args": function_args or [],
         }
         normalized_chain = normalize_chain_id(chain_id) or self.chain_id
-        return self._get(f"contract/{normalized_chain}/{contract_address}/read", payload)
+        return self._get(
+            f"contract/{normalized_chain}/{contract_address}/read", payload
+        )
 
     @tool(
         description="Execute a state-changing function on a smart contract by sending a transaction. This allows you to modify on-chain data, such as transferring tokens, minting NFTs, or updating contract configuration. The transaction is automatically signed by your backend wallet and submitted to the blockchain."
