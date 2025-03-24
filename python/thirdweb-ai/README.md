@@ -146,10 +146,46 @@ def adapt_to_my_framework(tools: list[Tool]):
 
 This project is licensed under the Apache License 2.0 - see the LICENSE file for details.
 
-## Contributing
+## Development and Testing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+### Setting up development environment
 
-## Support
+```bash
+# Clone the repository
+git clone https://github.com/thirdweb-dev/ai.git
+cd ai/python/thirdweb-ai
 
-If you need help or have questions, please contact [support@thirdweb.com](mailto:support@thirdweb.com).
+# Install dependencies with Poetry
+poetry install -E all
+```
+
+### Running tests
+
+We use pytest for testing. You can run the tests with:
+
+```bash
+# Run all tests
+poetry run pytest
+
+# Run tests with verbose output
+poetry run pytest -v
+
+# Run specific test file
+poetry run pytest tests/common/test_utils.py
+
+# Run tests with coverage report
+poetry run pytest --cov=thirdweb_ai
+
+# Run tests and generate HTML coverage report
+poetry run pytest --cov=thirdweb_ai --cov-report=html
+```
+
+### Linting and Type Checking
+
+```bash
+# Run the ruff linter
+poetry run ruff check .
+
+# Run type checking with pyright
+poetry run pyright
+```
