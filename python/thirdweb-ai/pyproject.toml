@@ -1,0 +1,113 @@
+[project]
+name = "thirdweb-ai"
+version = "0.1.4"
+description = "thirdweb AI"
+authors = [{ name = "thirdweb", email = "support@thirdweb.com" }]
+requires-python = ">=3.10,<4.0"
+readme = "README.md"
+license = "Apache-2.0"
+keywords = [
+    "thirdweb",
+    "sdk",
+    "crypto",
+    "agent",
+    "ai",
+    "web3",
+    "onchain",
+]
+dependencies = [
+    "pydantic>=2.10.6,<3",
+    "jsonref>=1.1.0,<2",
+    "httpx>=0.28.1,<0.29",
+]
+
+[project.optional-dependencies]
+all = [
+    "langchain-core>=0.3.0",
+    "goat-sdk>=0.1.0",
+    "openai-agents>=0.0.1",
+    "autogen-core>=0.4.0",
+    "llama-index-core>=0.12.0",
+    "coinbase-agentkit>=0.1.0,<0.2",
+    "mcp>=1.3.0",
+    "smolagents>=1.10.0",
+    "pydantic-ai>=0.0.39",
+]
+langchain = ["langchain-core>=0.3.0"]
+goat = ["goat-sdk>=0.1.0"]
+openai = ["openai-agents>=0.0.1"]
+autogen = ["autogen-core>=0.4.0"]
+llama-index = ["llama-index-core>=0.12.0"]
+agentkit = ["coinbase-agentkit>=0.1.0,<0.2"]
+mcp = ["mcp>=1.3.0"]
+smolagents = ["smolagents>=1.10.0"]
+pydantic-ai = ["pydantic-ai>=0.0.39"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9.10,<0.10",
+    "pyright>=1.1.396,<2",
+    "pytest>=7.4.0,<8",
+    "pytest-asyncio>=0.23.5,<0.24",
+    "pytest-mock>=3.12.0,<4",
+    "pytest-cov>=4.1.0,<5",
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/thirdweb_ai"]
+
+[tool.hatch.build.targets.wheel]
+include = ["src/thirdweb_ai"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src/thirdweb_ai" = "thirdweb_ai"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pyright]
+include = ["src"]
+typeCheckingMode = "strict"
+reportUnknownVariableType = "none"
+reportUnknownLambdaType = "none"
+reportUnknownArgumentType = "none"
+reportMissingTypeStubs = "none"
+reportAbstractUsage = "none"
+reportUnknownMemberType = "none"
+
+
+executionEnvironments = [
+  { root = "src/thirdweb_ai/adapters", reportMissingImports = "none", reportUnknownParameterType = "none", reportAttributeAccessIssue = "none", reportUntypedBaseClass = "none"},
+  { root = "src" }
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.ruff.lint]
+extend-select = [
+  "E", "F", "W", "I", "N", "UP", "A", "B", "ASYNC", "C4", "COM", "SIM", 
+  "RET", "YTT", "PTH", "INT", "TID", "SLOT", "SLF", "RSE", "Q", "PT", "PYI", "T20", 
+  "PIE", "LOG", "ICN", "ISC", "FA", "T10", "DTZ", "EXE", "RUF", "C", "FURB", "PERF",
+  "FLY", "PLC", "PLE", "PLW", "PGH", 
+]
+ignore = [
+  "SIM103", "E501", "UP017", "ISC001", "COM812", "PLC0105", "C901"
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["thirdweb_ai"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-v --cov=thirdweb_ai --cov-report=term-missing"
+testpaths = [
+    "tests",
+]
