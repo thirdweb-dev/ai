@@ -1,6 +1,6 @@
 [project]
 name = "thirdweb-ai"
-version = "0.1.6"
+dynamic = ["version"]
 description = "thirdweb AI"
 authors = [{ name = "thirdweb", email = "support@thirdweb.com" }]
 requires-python = ">=3.10,<4.0"
@@ -51,6 +51,7 @@ dev = [
     "pytest-asyncio>=0.23.5,<0.24",
     "pytest-mock>=3.12.0,<4",
     "pytest-cov>=4.1.0,<5",
+    "python-semantic-release>=8.7.0,<9",
 ]
 
 [tool.hatch.build.targets.sdist]
@@ -111,3 +112,19 @@ addopts = "-v --cov=thirdweb_ai --cov-report=term-missing"
 testpaths = [
     "tests",
 ]
+
+[tool.semantic_release]
+version_variable = ["src/thirdweb_ai/__init__.py:__version__"]
+branch = "main"
+upload_to_pypi = false
+upload_to_release = false
+build_command = "uv build"
+commit_subject = "chore: release thirdweb-ai {version}"
+commit_message = "Release thirdweb-ai version {version}"
+changelog_sections = [
+    {"type", "feat", "section", "Features"},
+    {"type", "fix", "section", "Bug Fixes"},
+    {"type", "perf", "section", "Performance Improvements"},
+    {"type", "refactor", "section", "Code Refactoring"},
+]
+major_on_zero = false

@@ -5,6 +5,8 @@ from mcp.server.fastmcp import FastMCP
 from thirdweb_ai import Engine, Insight, Nebula
 from thirdweb_ai.adapters.mcp import add_fastmcp_tools
 
+__version__ = "0.1.7"
+
 
 @click.command()
 @click.option(
@@ -64,6 +66,7 @@ def main(
 ):
     mcp = FastMCP("thirdweb MCP", port=port)
 
+    # Convert chain_id from tuple to list and cast all elements to int
     chain_ids = [int(chain_id) for chain_id in chain_id]
 
     # determine which services to enable based on the provided options
