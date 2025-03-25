@@ -3,7 +3,7 @@ name = "thirdweb-ai"
 dynamic = ["version"]
 description = "thirdweb AI"
 authors = [{ name = "thirdweb", email = "support@thirdweb.com" }]
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.12,<4.0"
 readme = "README.md"
 license = "Apache-2.0"
 keywords = [
