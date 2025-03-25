@@ -26,52 +26,49 @@ jobs:
         with:
           fetch-depth: 0
           
-      - name: Set up Python
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      
+      - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-          
-      - name: Install uv
-        run: pip install uv
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
           
       - name: Install dependencies (thirdweb-ai)
         run: |
           cd python/thirdweb-ai
-          uv pip install -e .
-          uv pip install .[dev]
+          uv sync --all
           
       - name: Run linting (thirdweb-ai)
         run: |
           cd python/thirdweb-ai
-          ruff check .
-          ruff format --check .
+          uv run ruff check .
           
       - name: Run type checking (thirdweb-ai)
         run: |
           cd python/thirdweb-ai
-          pyright
+          uv run pyright
           
       - name: Run tests (thirdweb-ai)
         run: |
           cd python/thirdweb-ai
-          pytest -v
+          uv run pytest
           
       - name: Install dependencies (thirdweb-mcp)
         run: |
           cd python/thirdweb-mcp
-          uv pip install -e .
-          uv pip install .[dev]
+          uv sync --all
           
       - name: Run linting (thirdweb-mcp)
         run: |
           cd python/thirdweb-mcp
-          ruff check .
-          ruff format --check .
+          uv run ruff check .
           
       - name: Run type checking (thirdweb-mcp)
         run: |
           cd python/thirdweb-mcp
-          pyright
+          uv run pyright
 
   update-versions:
     needs: prepare-and-validate
@@ -85,13 +82,14 @@ jobs:
         with:
           fetch-depth: 0
           
-      - name: Set up Python
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      
+      - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-          
-      - name: Install uv
-        run: pip install uv
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
         
       - name: Install semantic-release
         run: uv pip install python-semantic-release
@@ -233,18 +231,19 @@ jobs:
           git fetch
           git checkout $BRANCH_NAME
           
-      - name: Set up Python
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      
+      - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-          
-      - name: Install uv
-        run: pip install uv
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
         
       - name: Build package
         run: |
           cd python/thirdweb-ai
-          uv pip install build
+          uv sync
           uv build
           
       # Only upload artifacts in dry-run mode, don't publish to PyPI
@@ -281,18 +280,19 @@ jobs:
           git fetch
           git checkout $BRANCH_NAME
           
-      - name: Set up Python
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      
+      - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-          
-      - name: Install uv
-        run: pip install uv
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
         
       - name: Build package
         run: |
           cd python/thirdweb-mcp
-          uv pip install build
+          uv sync
           uv build
           
       # Only upload artifacts in dry-run mode, don't publish to PyPI
