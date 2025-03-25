@@ -95,7 +95,7 @@ class ParametersSchema(TypedDict):
 
 
 class ToolSchema(TypedDict):
-    parameters: NotRequired[ParametersSchema]
+    parameters: ParametersSchema
     name: str
     description: NotRequired[str]
     strict: NotRequired[bool]
