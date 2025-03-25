@@ -32,9 +32,7 @@ def test_get_autogen_tools(test_tools: list[Tool]):
 
     # Check properties were preserved
     assert [tool.name for tool in autogen_tools] == [tool.name for tool in test_tools]
-    assert [tool.description for tool in autogen_tools] == [
-        tool.description for tool in test_tools
-    ]
+    assert [tool.description for tool in autogen_tools] == [tool.description for tool in test_tools]
 
     # Check all tools have a run method
     assert all(callable(getattr(tool, "run", None)) for tool in autogen_tools)

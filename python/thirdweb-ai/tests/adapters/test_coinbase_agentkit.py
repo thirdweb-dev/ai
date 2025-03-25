@@ -31,20 +31,16 @@ def test_get_coinbase_agentkit_tools(test_tools: list[Tool]):
 
     # Check provider has actions
     assert len(provider._actions) == len(test_tools)
-    
+
     # Check all actions are properly set up
     assert all(isinstance(action, ActionMetadata) for action in provider._actions)
 
     # Check properties were preserved
     assert [action.name for action in provider._actions] == [tool.name for tool in test_tools]
-    assert [action.description for action in provider._actions] == [
-        tool.description for tool in test_tools
-    ]
+    assert [action.description for action in provider._actions] == [tool.description for tool in test_tools]
 
     # Verify that args_schema is set correctly
-    assert [action.args_schema for action in provider._actions] == [
-        tool.args_type() for tool in test_tools
-    ]
-    
+    assert [action.args_schema for action in provider._actions] == [tool.args_type() for tool in test_tools]
+
     # Check all actions have callable invoke functions
     assert all(callable(action.invoke) for action in provider._actions)

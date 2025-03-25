@@ -20,7 +20,7 @@ def test_get_openai_tools(test_tools: list[Tool]):
     # Skip if agents isn't installed
     if not has_module("agents"):
         pytest.skip("agents module not installed")
-    
+
     try:
         from thirdweb_ai.adapters.openai import get_openai_tools
 
@@ -38,7 +38,7 @@ def test_get_openai_tools(test_tools: list[Tool]):
                 assert tool.name in tool_names
             elif isinstance(tool, dict) and "function" in tool:
                 assert tool["function"]["name"] in tool_names
-            else:  
+            else:
                 # The test passes if we get here - at least we got some kind of object back
                 pass
     except (ImportError, AttributeError):

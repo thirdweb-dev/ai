@@ -32,12 +32,8 @@ def test_get_llama_index_tools(test_tools: list[Tool]):
 
     # Check properties were preserved
     assert [tool.metadata.name for tool in llama_tools] == [tool.name for tool in test_tools]
-    assert [tool.metadata.description for tool in llama_tools] == [
-        tool.description for tool in test_tools
-    ]
-    assert [tool.metadata.fn_schema for tool in llama_tools] == [
-        tool.args_type() for tool in test_tools
-    ]
+    assert [tool.metadata.description for tool in llama_tools] == [tool.description for tool in test_tools]
+    assert [tool.metadata.fn_schema for tool in llama_tools] == [tool.args_type() for tool in test_tools]
 
     # Check all tools are callable
     assert all(callable(tool) for tool in llama_tools)

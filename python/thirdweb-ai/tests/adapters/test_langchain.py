@@ -32,14 +32,10 @@ def test_get_langchain_tools(test_tools: list[Tool]):
 
     # Check properties were preserved
     assert [tool.name for tool in langchain_tools] == [tool.name for tool in test_tools]
-    assert [tool.description for tool in langchain_tools] == [
-        tool.description for tool in test_tools
-    ]
+    assert [tool.description for tool in langchain_tools] == [tool.description for tool in test_tools]
 
     # Check schemas were preserved
-    assert [tool.args_schema for tool in langchain_tools] == [
-        tool.args_type() for tool in test_tools
-    ]
+    assert [tool.args_schema for tool in langchain_tools] == [tool.args_type() for tool in test_tools]
 
     # Check all tools have callable run methods
     assert all(callable(getattr(tool, "func", None)) for tool in langchain_tools)

@@ -60,4 +60,3 @@ def test_function_tool() -> FunctionTool:
 def test_tools(test_tool: TestBaseTool, test_function_tool: FunctionTool) -> list[Tool]:
     """Fixture that returns a list of test tools."""
     return [test_tool, test_function_tool]
-

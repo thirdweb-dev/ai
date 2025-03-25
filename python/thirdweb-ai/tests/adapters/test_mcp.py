@@ -20,7 +20,7 @@ def test_get_mcp_tools(test_tools: list[Tool]):
     """Test converting thirdweb tools to MCP tools."""
     # Skip this test if module not fully installed
     pytest.importorskip("mcp.types")
-    
+
     import mcp.types as mcp_types
 
     from thirdweb_ai.adapters.mcp import get_mcp_tools
@@ -36,9 +36,7 @@ def test_get_mcp_tools(test_tools: list[Tool]):
 
     # Check properties were preserved
     assert [tool.name for tool in mcp_tools] == [tool.name for tool in test_tools]
-    assert [tool.description for tool in mcp_tools] == [
-        tool.description for tool in test_tools
-    ]
+    assert [tool.description for tool in mcp_tools] == [tool.description for tool in test_tools]
 
     # Check that input schemas were set correctly
     for i, tool in enumerate(mcp_tools):
@@ -50,7 +48,7 @@ def test_get_fastmcp_tools(test_tools: list[Tool]):
     """Test converting thirdweb tools to FastMCP tools."""
     # Skip this test if module not fully installed
     pytest.importorskip("mcp.server.fastmcp.tools.base")
-    
+
     try:
         from mcp.server.fastmcp.tools.base import Tool as FastMCPTool
 
@@ -59,7 +57,7 @@ def test_get_fastmcp_tools(test_tools: list[Tool]):
         # Patch test_tools if needed to avoid attribute error
         for tool in test_tools:
             if not hasattr(tool, "_func_definition"):
-                setattr(tool, "_func_definition", getattr(tool, "run", None))  # Use run method as fallback
+                tool._func_definition = getattr(tool, "run", None)  # Use run method as fallback
 
         # Convert tools to FastMCP tools
         fastmcp_tools = get_fastmcp_tools(test_tools)
@@ -72,9 +70,7 @@ def test_get_fastmcp_tools(test_tools: list[Tool]):
 
         # Check properties were preserved
         assert [tool.name for tool in fastmcp_tools] == [tool.name for tool in test_tools]
-        assert [tool.description for tool in fastmcp_tools] == [
-            tool.description for tool in test_tools
-        ]
+        assert [tool.description for tool in fastmcp_tools] == [tool.description for tool in test_tools]
 
         # Check all tools have callable run functions
         assert all(callable(tool.fn) for tool in fastmcp_tools)
@@ -87,7 +83,7 @@ def test_add_fastmcp_tools(test_tools: list[Tool]):
     """Test adding thirdweb tools to a FastMCP instance."""
     # Skip this test if module not fully installed
     pytest.importorskip("mcp.server.fastmcp")
-    
+
     try:
         from thirdweb_ai.adapters.mcp import add_fastmcp_tools
 
@@ -99,17 +95,17 @@ def test_add_fastmcp_tools(test_tools: list[Tool]):
         # Patch test_tools if needed to avoid attribute error
         for tool in test_tools:
             if not hasattr(tool, "_func_definition"):
-                setattr(tool, "_func_definition", getattr(tool, "run", None))  # Use run method as fallback
+                tool._func_definition = getattr(tool, "run", None)  # Use run method as fallback
 
         # Add tools to the FastMCP instance
         add_fastmcp_tools(mock_fastmcp, test_tools)
 
         # Check that the tools were added to the FastMCP instance
         assert len(mock_fastmcp._tool_manager._tools) == len(test_tools)
-        
+
         # Get the expected tool names
         expected_tool_names = [tool.name for tool in test_tools]
-        
+
         # Check that all expected tools were added
         for name in expected_tool_names:
             assert name in mock_fastmcp._tool_manager._tools

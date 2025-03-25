@@ -20,7 +20,7 @@ def test_get_pydantic_ai_tools(test_tools: list[Tool]):
     # Skip this test if module not fully installed
     if not pydantic_ai_installed:
         pytest.skip("pydantic_ai module not installed")
-    
+
     # Create a mock class - we'll have the real tools use this instead
     # of checking against the actual class
     class MockPydanticAITool:
@@ -29,7 +29,7 @@ def test_get_pydantic_ai_tools(test_tools: list[Tool]):
             self.description = description
             self.fn = fn
             self.schema = schema
-            
+
         def run(self, *args, **kwargs):
             if callable(self.fn):
                 return self.fn(*args, **kwargs)
@@ -37,22 +37,23 @@ def test_get_pydantic_ai_tools(test_tools: list[Tool]):
 
     # Import our adapter
     from thirdweb_ai.adapters.pydantic_ai import get_pydantic_ai_tools
-    
+
     # Monkey patch the tool to use our mock if needed
     try:
         import sys
+
         from pydantic_ai.tool.base import BaseTool as PydanticAITool
     except ImportError:
         # If we can't import directly, we'll monkey patch the module
         import sys
         import types
-        
+
         # Create a mock module
         if "pydantic_ai.tool.base" not in sys.modules:
             module = types.ModuleType("pydantic_ai.tool.base")
             module.BaseTool = MockPydanticAITool
             sys.modules["pydantic_ai.tool.base"] = module
-        
+
         # Use our mock tool
         PydanticAITool = MockPydanticAITool
 
