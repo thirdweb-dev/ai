@@ -38,7 +38,7 @@ jobs:
       - name: Install dependencies (thirdweb-ai)
         run: |
           cd python/thirdweb-ai
-          uv sync --all
+          uv sync --all-groups
           
       - name: Run linting (thirdweb-ai)
         run: |
@@ -58,7 +58,7 @@ jobs:
       - name: Install dependencies (thirdweb-mcp)
         run: |
           cd python/thirdweb-mcp
-          uv sync --all
+          uv sync --all-groups
           
       - name: Run linting (thirdweb-mcp)
         run: |
@@ -91,9 +91,6 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
         
-      - name: Install semantic-release
-        run: uv pip install python-semantic-release
-        
       - name: Configure Git
         run: |
           git config --global user.name "GitHub Actions"
@@ -103,7 +100,7 @@ jobs:
         id: get-versions
         run: |
           AI_CURRENT_VERSION=$(grep -o '__version__ = "[^"]*"' python/thirdweb-ai/src/thirdweb_ai/__init__.py | cut -d'"' -f2)
-          MCP_CURRENT_VERSION=$(grep -o '__version__ = "[^"]*"' python/thirdweb-mcp/src/mcp.py | cut -d'"' -f2)
+          MCP_CURRENT_VERSION=$(grep -o '__version__ = "[^"]*"' python/thirdweb-mcp/thirdweb-mcp/__init__.py | cut -d'"' -f2)
           echo "AI current version: $AI_CURRENT_VERSION"
           echo "MCP current version: $MCP_CURRENT_VERSION"
           echo "ai_current_version=$AI_CURRENT_VERSION" >> $GITHUB_OUTPUT
@@ -152,7 +149,7 @@ jobs:
         run: |
           NEW_VERSION="${{ steps.calc-versions.outputs.new_version }}"
           # Update thirdweb-mcp version
-          sed -i "s/__version__ = \"[^\"]*\"/__version__ = \"$NEW_VERSION\"/" python/thirdweb-mcp/src/mcp.py
+          sed -i "s/__version__ = \"[^\"]*\"/__version__ = \"$NEW_VERSION\"/" python/thirdweb-mcp/src/thirdweb_mcp/__init__.py
           
           # Update dependency on thirdweb-ai in thirdweb-mcp
           sed -i "s/thirdweb-ai\[mcp\]>=.*/thirdweb-ai\[mcp\]>=$NEW_VERSION/" python/thirdweb-mcp/pyproject.toml
@@ -170,7 +167,7 @@ jobs:
           git checkout -b $BRANCH_NAME
           
           git add python/thirdweb-ai/src/thirdweb_ai/__init__.py
-          git add python/thirdweb-mcp/src/mcp.py
+          git add python/thirdweb-mcp/src/thirdweb_mcp/mcp.py
           git add python/thirdweb-mcp/pyproject.toml
           git commit -m "test: prepare release v$NEW_VERSION for both packages (DRY RUN)"
           git push --set-upstream origin $BRANCH_NAME
@@ -183,7 +180,7 @@ jobs:
         run: |
           NEW_VERSION="${{ steps.calc-versions.outputs.new_version }}"
           git add python/thirdweb-ai/src/thirdweb_ai/__init__.py
-          git add python/thirdweb-mcp/src/mcp.py
+          git add python/thirdweb-mcp/src/thirdweb_mcp/mcp.py
           git add python/thirdweb-mcp/pyproject.toml
           git commit -m "chore: prepare release v$NEW_VERSION for both packages"
           git push
