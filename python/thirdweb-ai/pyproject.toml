@@ -54,6 +54,10 @@ dev = [
     "python-semantic-release>=8.7.0,<9",
 ]
 
+
+[tool.hatch.version]
+path = "src/thirdweb_ai/__init__.py"
+
 [tool.hatch.build.targets.sdist]
 include = ["src/thirdweb_ai"]
 
@@ -122,9 +126,9 @@ build_command = "uv build"
 commit_subject = "chore: release thirdweb-ai {version}"
 commit_message = "Release thirdweb-ai version {version}"
 changelog_sections = [
-    {"type", "feat", "section", "Features"},
-    {"type", "fix", "section", "Bug Fixes"},
-    {"type", "perf", "section", "Performance Improvements"},
-    {"type", "refactor", "section", "Code Refactoring"},
+    {"type" = "feat", "section" = "Features"},
+    {"type" = "fix", "section" = "Bug Fixes"},
+    {"type" = "perf", "section" = "Performance Improvements"},
+    {"type" = "refactor", "section" = "Code Refactoring"},
 ]
 major_on_zero = false
