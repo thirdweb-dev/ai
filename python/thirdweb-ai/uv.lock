@@ -3427,6 +3427,7 @@ dependencies = [
     { name = "langchain-core" },
     { name = "llama-index-core" },
     { name = "pydantic" },
+    { name = "pytest-cov" },
 ]
 
 [package.optional-dependencies]
@@ -3504,6 +3505,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.10.6,<3" },
     { name = "pydantic-ai", marker = "extra == 'all'", specifier = ">=0.0.39" },
     { name = "pydantic-ai", marker = "extra == 'pydantic-ai'", specifier = ">=0.0.39" },
+    { name = "pytest-cov", specifier = ">=4.1.0" },
     { name = "smolagents", marker = "extra == 'all'", specifier = ">=1.10.0" },
     { name = "smolagents", marker = "extra == 'smolagents'", specifier = ">=1.10.0" },
 ]

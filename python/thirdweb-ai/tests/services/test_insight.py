@@ -20,9 +20,3 @@ class TestInsight:
     def test_initialization(self):
         """Test initialization with various chain_id formats."""
         assert self.insight.chain_ids is None
-
-
-TestInsight().test_initialization()
-
-insight = DevInsight()
-insight.get_all_events.__wrapped__()
