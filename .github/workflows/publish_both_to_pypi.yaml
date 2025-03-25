@@ -1,0 +1,366 @@
+name: Publish Both Packages to PyPI
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_increment:
+        description: 'Version increment type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      dry_run:
+        description: 'Dry run (no actual publishing)'
+        required: true
+        default: true
+        type: boolean
+
+jobs:
+  prepare-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+          
+      - name: Install dependencies (thirdweb-ai)
+        run: |
+          cd python/thirdweb-ai
+          uv sync --all-groups
+          
+      - name: Run linting (thirdweb-ai)
+        run: |
+          cd python/thirdweb-ai
+          uv run ruff check .
+          
+      - name: Run type checking (thirdweb-ai)
+        run: |
+          cd python/thirdweb-ai
+          uv run pyright
+          
+      - name: Run tests (thirdweb-ai)
+        run: |
+          cd python/thirdweb-ai
+          uv run pytest
+          
+      - name: Install dependencies (thirdweb-mcp)
+        run: |
+          cd python/thirdweb-mcp
+          uv sync --all-groups
+          
+      - name: Run linting (thirdweb-mcp)
+        run: |
+          cd python/thirdweb-mcp
+          uv run ruff check .
+          
+      - name: Run type checking (thirdweb-mcp)
+        run: |
+          cd python/thirdweb-mcp
+          uv run pyright
+
+  update-versions:
+    needs: prepare-and-validate
+    runs-on: ubuntu-latest
+    outputs:
+      ai_version: ${{ steps.ai-version.outputs.version }}
+      mcp_version: ${{ steps.mcp-version.outputs.version }}
+      is_dry_run: ${{ inputs.dry_run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+        
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          
+      - name: Get current versions
+        id: get-versions
+        run: |
+          AI_CURRENT_VERSION=$(grep -o '__version__ = "[^"]*"' python/thirdweb-ai/src/thirdweb_ai/__init__.py | cut -d'"' -f2)
+          MCP_CURRENT_VERSION=$(grep -o '__version__ = "[^"]*"' python/thirdweb-mcp/thirdweb-mcp/__init__.py | cut -d'"' -f2)
+          echo "AI current version: $AI_CURRENT_VERSION"
+          echo "MCP current version: $MCP_CURRENT_VERSION"
+          echo "ai_current_version=$AI_CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "mcp_current_version=$MCP_CURRENT_VERSION" >> $GITHUB_OUTPUT
+          
+      - name: Calculate new versions
+        id: calc-versions
+        run: |
+          AI_CURRENT_VERSION="${{ steps.get-versions.outputs.ai_current_version }}"
+          
+          # Split version into parts
+          IFS='.' read -ra VERSION_PARTS <<< "$AI_CURRENT_VERSION"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+          
+          # Increment based on input
+          if [[ "${{ inputs.version_increment }}" == "major" ]]; then
+            MAJOR=$((MAJOR+1))
+            MINOR=0
+            PATCH=0
+          elif [[ "${{ inputs.version_increment }}" == "minor" ]]; then
+            MINOR=$((MINOR+1))
+            PATCH=0
+          else
+            PATCH=$((PATCH+1))
+          fi
+          
+          # For dry run, add -test suffix
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}-test"
+            echo "Running in dry-run mode, using version suffix '-test'"
+          else
+            NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          fi
+          
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          
+      - name: Update thirdweb-ai version
+        run: |
+          NEW_VERSION="${{ steps.calc-versions.outputs.new_version }}"
+          sed -i "s/__version__ = \"[^\"]*\"/__version__ = \"$NEW_VERSION\"/" python/thirdweb-ai/src/thirdweb_ai/__init__.py
+          echo "Updated thirdweb-ai version to $NEW_VERSION"
+          
+      - name: Update thirdweb-mcp version and dependency
+        run: |
+          NEW_VERSION="${{ steps.calc-versions.outputs.new_version }}"
+          # Update thirdweb-mcp version
+          sed -i "s/__version__ = \"[^\"]*\"/__version__ = \"$NEW_VERSION\"/" python/thirdweb-mcp/src/thirdweb_mcp/__init__.py
+          
+          # Update dependency on thirdweb-ai in thirdweb-mcp
+          sed -i "s/thirdweb-ai\[mcp\]>=.*/thirdweb-ai\[mcp\]>=$NEW_VERSION/" python/thirdweb-mcp/pyproject.toml
+          
+          echo "Updated thirdweb-mcp version to $NEW_VERSION and dependency on thirdweb-ai"
+        
+      # For dry run we create a special dry-run branch instead of pushing to main
+      - name: Commit version changes (dry run)
+        if: ${{ inputs.dry_run == 'true' }}
+        run: |
+          NEW_VERSION="${{ steps.calc-versions.outputs.new_version }}"
+          BRANCH_NAME="dry-run/release-$NEW_VERSION"
+          
+          # Create and switch to new branch
+          git checkout -b $BRANCH_NAME
+          
+          git add python/thirdweb-ai/src/thirdweb_ai/__init__.py
+          git add python/thirdweb-mcp/src/thirdweb_mcp/mcp.py
+          git add python/thirdweb-mcp/pyproject.toml
+          git commit -m "test: prepare release v$NEW_VERSION for both packages (DRY RUN)"
+          git push --set-upstream origin $BRANCH_NAME
+          
+          echo "Created dry run branch: $BRANCH_NAME"
+          
+      # Only run for actual releases
+      - name: Commit version changes (actual release)
+        if: ${{ inputs.dry_run != 'true' }}
+        run: |
+          NEW_VERSION="${{ steps.calc-versions.outputs.new_version }}"
+          git add python/thirdweb-ai/src/thirdweb_ai/__init__.py
+          git add python/thirdweb-mcp/src/thirdweb_mcp/mcp.py
+          git add python/thirdweb-mcp/pyproject.toml
+          git commit -m "chore: prepare release v$NEW_VERSION for both packages"
+          git push
+          
+      # Create test tags with a "dry-run" prefix
+      - name: Create version tags (dry run)
+        if: ${{ inputs.dry_run == 'true' }}
+        run: |
+          NEW_VERSION="${{ steps.calc-versions.outputs.new_version }}"
+          git tag "dry-run/thirdweb-ai-v$NEW_VERSION"
+          git tag "dry-run/thirdweb-mcp-v$NEW_VERSION"
+          git push --tags
+          
+      # Only create real tags for actual releases
+      - name: Create version tags (actual release)
+        if: ${{ inputs.dry_run != 'true' }}
+        run: |
+          NEW_VERSION="${{ steps.calc-versions.outputs.new_version }}"
+          git tag "thirdweb-ai-v$NEW_VERSION"
+          git tag "thirdweb-mcp-v$NEW_VERSION"
+          git push --tags
+          
+      - name: Set version outputs
+        id: ai-version
+        run: echo "version=${{ steps.calc-versions.outputs.new_version }}" >> $GITHUB_OUTPUT
+        
+      - name: Set mcp version
+        id: mcp-version
+        run: echo "version=${{ steps.calc-versions.outputs.new_version }}" >> $GITHUB_OUTPUT
+
+  build-ai:
+    needs: update-versions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      # If dry-run, checkout the dry-run branch
+      - name: Checkout dry-run branch (dry run)
+        if: ${{ needs.update-versions.outputs.is_dry_run == 'true' }}
+        run: |
+          NEW_VERSION="${{ needs.update-versions.outputs.ai_version }}"
+          BRANCH_NAME="dry-run/release-$NEW_VERSION"
+          git fetch
+          git checkout $BRANCH_NAME
+          
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+        
+      - name: Build package
+        run: |
+          cd python/thirdweb-ai
+          uv sync
+          uv build
+          
+      # Only upload artifacts in dry-run mode, don't publish to PyPI
+      - name: Upload build artifacts
+        if: ${{ needs.update-versions.outputs.is_dry_run == 'true' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: thirdweb-ai-dist
+          path: python/thirdweb-ai/dist/
+          
+      # For an actual release, publish to PyPI
+      - name: Publish to PyPI
+        if: ${{ needs.update-versions.outputs.is_dry_run != 'true' }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: python/thirdweb-ai/dist/
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          verbose: true
+
+  build-mcp:
+    needs: [update-versions, build-ai]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      # If dry-run, checkout the dry-run branch
+      - name: Checkout dry-run branch (dry run)
+        if: ${{ needs.update-versions.outputs.is_dry_run == 'true' }}
+        run: |
+          NEW_VERSION="${{ needs.update-versions.outputs.mcp_version }}"
+          BRANCH_NAME="dry-run/release-$NEW_VERSION"
+          git fetch
+          git checkout $BRANCH_NAME
+          
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+        
+      - name: Build package
+        run: |
+          cd python/thirdweb-mcp
+          uv sync
+          uv build
+          
+      # Only upload artifacts in dry-run mode, don't publish to PyPI
+      - name: Upload build artifacts
+        if: ${{ needs.update-versions.outputs.is_dry_run == 'true' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: thirdweb-mcp-dist
+          path: python/thirdweb-mcp/dist/
+          
+      # For an actual release, publish to PyPI
+      - name: Publish to PyPI
+        if: ${{ needs.update-versions.outputs.is_dry_run != 'true' }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: python/thirdweb-mcp/dist/
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          verbose: true
+
+  create-github-release:
+    needs: [update-versions, build-ai, build-mcp]
+    # Only run for actual releases, not dry runs
+    if: ${{ needs.update-versions.outputs.is_dry_run != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: v${{ needs.update-versions.outputs.ai_version }}
+          tag_name: thirdweb-ai-v${{ needs.update-versions.outputs.ai_version }}
+          body: |
+            # Release v${{ needs.update-versions.outputs.ai_version }}
+            
+            This release includes updates to both packages:
+            - thirdweb-ai v${{ needs.update-versions.outputs.ai_version }}
+            - thirdweb-mcp v${{ needs.update-versions.outputs.mcp_version }}
+            
+            Both packages are available on PyPI.
+          generate_release_notes: true
+          
+  # New job to create a dry run summary
+  dry-run-summary:
+    needs: [update-versions, build-ai, build-mcp]
+    if: ${{ needs.update-versions.outputs.is_dry_run == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        
+      - name: Generate dry run report
+        run: |
+          echo "# Dry Run Summary" > dry_run_report.md
+          echo "" >> dry_run_report.md
+          echo "## Version Information" >> dry_run_report.md
+          echo "- thirdweb-ai version: ${{ needs.update-versions.outputs.ai_version }}" >> dry_run_report.md
+          echo "- thirdweb-mcp version: ${{ needs.update-versions.outputs.mcp_version }}" >> dry_run_report.md
+          echo "" >> dry_run_report.md
+          echo "## Dry Run Details" >> dry_run_report.md
+          echo "- Branch: dry-run/release-${{ needs.update-versions.outputs.ai_version }}" >> dry_run_report.md
+          echo "- Tags created:" >> dry_run_report.md
+          echo "  - dry-run/thirdweb-ai-v${{ needs.update-versions.outputs.ai_version }}" >> dry_run_report.md
+          echo "  - dry-run/thirdweb-mcp-v${{ needs.update-versions.outputs.mcp_version }}" >> dry_run_report.md
+          echo "" >> dry_run_report.md
+          echo "## Next Steps" >> dry_run_report.md
+          echo "To proceed with an actual release, run the workflow again with dry_run set to false." >> dry_run_report.md
+          
+      - name: Upload dry run report
+        uses: actions/upload-artifact@v3
+        with:
+          name: dry-run-report
+          path: dry_run_report.md
