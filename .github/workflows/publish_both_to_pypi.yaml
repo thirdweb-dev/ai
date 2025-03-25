@@ -1,0 +1,256 @@
+name: Publish Both Packages to PyPI
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_increment:
+        description: 'Version increment type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  prepare-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          
+      - name: Install uv
+        run: pip install uv
+          
+      - name: Install dependencies (thirdweb-ai)
+        run: |
+          cd python/thirdweb-ai
+          uv pip install -e .
+          uv pip install .[dev]
+          
+      - name: Run linting (thirdweb-ai)
+        run: |
+          cd python/thirdweb-ai
+          ruff check .
+          ruff format --check .
+          
+      - name: Run type checking (thirdweb-ai)
+        run: |
+          cd python/thirdweb-ai
+          pyright
+          
+      - name: Run tests (thirdweb-ai)
+        run: |
+          cd python/thirdweb-ai
+          pytest -v
+          
+      - name: Install dependencies (thirdweb-mcp)
+        run: |
+          cd python/thirdweb-mcp
+          uv pip install -e .
+          uv pip install .[dev]
+          
+      - name: Run linting (thirdweb-mcp)
+        run: |
+          cd python/thirdweb-mcp
+          ruff check .
+          ruff format --check .
+          
+      - name: Run type checking (thirdweb-mcp)
+        run: |
+          cd python/thirdweb-mcp
+          pyright
+
+  update-versions:
+    needs: prepare-and-validate
+    runs-on: ubuntu-latest
+    outputs:
+      ai_version: ${{ steps.ai-version.outputs.version }}
+      mcp_version: ${{ steps.mcp-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          
+      - name: Install uv
+        run: pip install uv
+        
+      - name: Install semantic-release
+        run: uv pip install python-semantic-release
+        
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          
+      - name: Get current versions
+        id: get-versions
+        run: |
+          AI_CURRENT_VERSION=$(grep -o '__version__ = "[^"]*"' python/thirdweb-ai/src/thirdweb_ai/__init__.py | cut -d'"' -f2)
+          MCP_CURRENT_VERSION=$(grep -o '__version__ = "[^"]*"' python/thirdweb-mcp/src/mcp.py | cut -d'"' -f2)
+          echo "AI current version: $AI_CURRENT_VERSION"
+          echo "MCP current version: $MCP_CURRENT_VERSION"
+          echo "ai_current_version=$AI_CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "mcp_current_version=$MCP_CURRENT_VERSION" >> $GITHUB_OUTPUT
+          
+      - name: Calculate new versions
+        id: calc-versions
+        run: |
+          AI_CURRENT_VERSION="${{ steps.get-versions.outputs.ai_current_version }}"
+          
+          # Split version into parts
+          IFS='.' read -ra VERSION_PARTS <<< "$AI_CURRENT_VERSION"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+          
+          # Increment based on input
+          if [[ "${{ inputs.version_increment }}" == "major" ]]; then
+            MAJOR=$((MAJOR+1))
+            MINOR=0
+            PATCH=0
+          elif [[ "${{ inputs.version_increment }}" == "minor" ]]; then
+            MINOR=$((MINOR+1))
+            PATCH=0
+          else
+            PATCH=$((PATCH+1))
+          fi
+          
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          
+      - name: Update thirdweb-ai version
+        run: |
+          NEW_VERSION="${{ steps.calc-versions.outputs.new_version }}"
+          sed -i "s/__version__ = \"[^\"]*\"/__version__ = \"$NEW_VERSION\"/" python/thirdweb-ai/src/thirdweb_ai/__init__.py
+          echo "Updated thirdweb-ai version to $NEW_VERSION"
+          
+      - name: Update thirdweb-mcp version and dependency
+        run: |
+          NEW_VERSION="${{ steps.calc-versions.outputs.new_version }}"
+          # Update thirdweb-mcp version
+          sed -i "s/__version__ = \"[^\"]*\"/__version__ = \"$NEW_VERSION\"/" python/thirdweb-mcp/src/mcp.py
+          
+          # Update dependency on thirdweb-ai in thirdweb-mcp
+          sed -i "s/thirdweb-ai\[mcp\]>=.*/thirdweb-ai\[mcp\]>=$NEW_VERSION/" python/thirdweb-mcp/pyproject.toml
+          
+          echo "Updated thirdweb-mcp version to $NEW_VERSION and dependency on thirdweb-ai"
+        
+      - name: Commit version changes
+        run: |
+          NEW_VERSION="${{ steps.calc-versions.outputs.new_version }}"
+          git add python/thirdweb-ai/src/thirdweb_ai/__init__.py
+          git add python/thirdweb-mcp/src/mcp.py
+          git add python/thirdweb-mcp/pyproject.toml
+          git commit -m "chore: prepare release v$NEW_VERSION for both packages"
+          git push
+          
+      - name: Create version tags
+        run: |
+          NEW_VERSION="${{ steps.calc-versions.outputs.new_version }}"
+          git tag "thirdweb-ai-v$NEW_VERSION"
+          git tag "thirdweb-mcp-v$NEW_VERSION"
+          git push --tags
+          
+      - name: Set version outputs
+        id: ai-version
+        run: echo "version=${{ steps.calc-versions.outputs.new_version }}" >> $GITHUB_OUTPUT
+        
+      - name: Set mcp version
+        id: mcp-version
+        run: echo "version=${{ steps.calc-versions.outputs.new_version }}" >> $GITHUB_OUTPUT
+
+  publish-ai:
+    needs: update-versions
+    runs-on: ubuntu-latest
+    environment: PyPI
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          
+      - name: Install uv
+        run: pip install uv
+        
+      - name: Build package
+        run: |
+          cd python/thirdweb-ai
+          uv pip install build
+          uv build
+          
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: python/thirdweb-ai/dist/
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          verbose: true
+
+  publish-mcp:
+    needs: [update-versions, publish-ai]
+    runs-on: ubuntu-latest
+    environment: PyPI
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          
+      - name: Install uv
+        run: pip install uv
+        
+      - name: Build package
+        run: |
+          cd python/thirdweb-mcp
+          uv pip install build
+          uv build
+          
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: python/thirdweb-mcp/dist/
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          verbose: true
+
+  create-github-release:
+    needs: [update-versions, publish-ai, publish-mcp]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: v${{ needs.update-versions.outputs.ai_version }}
+          tag_name: thirdweb-ai-v${{ needs.update-versions.outputs.ai_version }}
+          body: |
+            # Release v${{ needs.update-versions.outputs.ai_version }}
+            
+            This release includes updates to both packages:
+            - thirdweb-ai v${{ needs.update-versions.outputs.ai_version }}
+            - thirdweb-mcp v${{ needs.update-versions.outputs.mcp_version }}
+            
+            Both packages are available on PyPI.
+          generate_release_notes: true
