@@ -22,7 +22,29 @@ The publishing workflow is designed to:
    - `patch` (e.g., 0.1.4 → 0.1.5) for bug fixes and small changes
    - `minor` (e.g., 0.1.4 → 0.2.0) for new features
    - `major` (e.g., 0.1.4 → 1.0.0) for breaking changes
-5. Click "Run workflow"
+5. Select "Dry run" option (default: true) to test without publishing
+6. Click "Run workflow"
+
+### Testing with Dry Run Mode
+
+The workflow includes a "dry run" option that allows testing the entire release process without publishing to PyPI:
+
+1. When "Dry run" is enabled:
+   - A new branch is created with pattern `dry-run/release-{version}-test`
+   - Version numbers include a `-test` suffix
+   - Tags are prefixed with `dry-run/`
+   - Packages are built but not published to PyPI
+   - Build artifacts are uploaded to GitHub Actions artifacts
+   - A summary report is generated as an artifact
+
+2. Review the dry run results:
+   - Check the generated branch and tags
+   - Download and inspect the package artifacts
+   - Verify version numbers and dependencies are updated correctly
+   - Review the summary report
+
+3. When ready for a real release:
+   - Run the workflow again with "Dry run" disabled
 
 ### Workflow Process
 
@@ -41,11 +63,14 @@ The workflow executes the following steps automatically:
    - Commits these changes to the repository
    - Creates Git tags for both packages
 
-3. **Publishing**
-   - Builds and publishes thirdweb-ai to PyPI
-   - Waits for successful completion
-   - Builds and publishes thirdweb-mcp to PyPI
-   - Creates a GitHub release with release notes
+3. **Building and Publishing**
+   - Builds thirdweb-ai package
+   - In dry run: uploads artifacts
+   - In real release: publishes to PyPI
+   - Builds thirdweb-mcp package
+   - In dry run: uploads artifacts
+   - In real release: publishes to PyPI
+   - Creates a GitHub release with release notes (real release only)
 
 ## Versioning
 
@@ -84,5 +109,21 @@ If the workflow fails:
    - Failing tests or linting errors
    - PyPI authentication problems
    - Version conflicts
+   - Git permission issues
+
+3. For dry run branch cleanup:
+   ```bash
+   # Delete local dry run branch
+   git branch -D dry-run/release-x.y.z-test
+   
+   # Delete remote dry run branch
+   git push origin --delete dry-run/release-x.y.z-test
+   
+   # Delete dry run tags
+   git tag -d dry-run/thirdweb-ai-vx.y.z-test
+   git tag -d dry-run/thirdweb-mcp-vx.y.z-test
+   git push --delete origin dry-run/thirdweb-ai-vx.y.z-test
+   git push --delete origin dry-run/thirdweb-mcp-vx.y.z-test
+   ```
 
 For persistent issues, contact the repository maintainers.
