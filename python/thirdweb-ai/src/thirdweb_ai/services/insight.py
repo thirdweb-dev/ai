@@ -11,24 +11,6 @@ class Insight(Service):
         normalized = normalize_chain_id(chain_id)
         self.chain_ids = normalized if isinstance(normalized, list) else [normalized]
 
-    def _normalize_chain_ids(self, chain_id: int | str | list[int | str]) -> list[int]:
-        """Normalize chain IDs to always be a list of integers"""
-        if isinstance(chain_id, (int, str)):
-            chain_id = [chain_id]
-
-        normalized = []
-        for cid in chain_id:
-            if isinstance(cid, str):
-                # Remove quotes if present
-                cid = cid.strip('"\'')
-                try:
-                    normalized.append(int(cid))
-                except ValueError as e:
-                    raise ValueError(f"Invalid chain_id format: {cid}") from e
-            else:
-                normalized.append(int(cid))
-        return normalized
-
     @tool(
         description="Retrieve blockchain events with flexible filtering options. Use this to search for specific events or to analyze event patterns across multiple blocks."
     )
