@@ -11,9 +11,7 @@ def extract_digits(value: int | str) -> int:
     extracted_digits = digit_match.group()
 
     if not extracted_digits.isdigit():
-        raise ValueError(
-            f"Extracted value '{extracted_digits}' is not a valid digit string"
-        )
+        raise ValueError(f"Extracted value '{extracted_digits}' is not a valid digit string")
     return int(extracted_digits)
 
 

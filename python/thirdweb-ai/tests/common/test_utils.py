@@ -41,4 +41,3 @@ class TestNormalizeChainId:
         # doesn't trigger this error case since re.search('\d+') always
         # returns a valid digit string if it matches
         pass
-

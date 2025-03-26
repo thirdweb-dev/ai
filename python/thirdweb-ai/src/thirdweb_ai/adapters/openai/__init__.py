@@ -1,3 +1,3 @@
-from .agents import get_agents_tools
+from .agents import get_agents_tools as get_openai_tools
 
-__all__ = ["get_agents_tools"]
+__all__ = ["get_openai_tools"]
