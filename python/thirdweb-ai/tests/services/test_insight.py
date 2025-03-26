@@ -1,22 +1,110 @@
-from thirdweb_ai.common.utils import normalize_chain_id
+import os
+
+import pytest
+
 from thirdweb_ai.services.insight import Insight
 
 
-class DevInsight(Insight):
-    """Subclass of Insight that uses the dev URL by default."""
+class MockInsight(Insight):
+    def __init__(self, secret_key: str, chain_id: int | str | list[int | str]):
+        super().__init__(secret_key=secret_key, chain_id=chain_id)
+        self.base_url = "https://insight.thirdweb-dev.com/v1"
 
-    def __init__(self, chain_id: list[str | int] | str | int | None = None):
-        self.base_url = "https://insight.thirdweb-dev.com"
-        normalized = normalize_chain_id(chain_id)
-        self.chain_ids = normalized if isinstance(normalized, list) else [normalized]
+
+@pytest.fixture
+def insight():
+    return MockInsight(secret_key=os.getenv("__THIRDWEB_SECRET_KEY_DEV") or "", chain_id=84532)
 
 
 class TestInsight:
-    """Tests for the Insight service using the dev environment."""
+    # Constants
+    CHAIN_ID = 84532
+    TEST_ADDRESS = "0xC22166664e820cdA6bf4cedBdbb4fa1E6A84C440"
+    TEST_DOMAIN = "thirdweb.eth"
+    DEFAULT_LIMIT = 5
 
-    def __init__(self):
-        self.insight = DevInsight()
+    def test_get_all_events(self, insight: Insight):
+        get_all_events = insight.get_all_events.__wrapped__
+        result = get_all_events(insight, chain=self.CHAIN_ID, address=self.TEST_ADDRESS, limit=self.DEFAULT_LIMIT)
 
-    def test_initialization(self):
-        """Test initialization with various chain_id formats."""
-        assert self.insight.chain_ids is None
+        assert isinstance(result, dict)
+        assert "meta" in result
+
+    def test_get_contract_events(self, insight: Insight):
+        get_contract_events = insight.get_contract_events.__wrapped__
+        result = get_contract_events(
+            insight, chain=self.CHAIN_ID, contract_address=self.TEST_ADDRESS, limit=self.DEFAULT_LIMIT
+        )
+
+        assert isinstance(result, dict)
+        assert "meta" in result
+
+    def test_get_all_transactions(self, insight: Insight):
+        get_all_transactions = insight.get_all_transactions.__wrapped__
+        result = get_all_transactions(insight, chain=self.CHAIN_ID, limit=self.DEFAULT_LIMIT)
+
+        assert isinstance(result, dict)
+        assert "meta" in result
+
+    def test_get_erc20_tokens(self, insight: Insight):
+        get_erc20_tokens = insight.get_erc20_tokens.__wrapped__
+        result = get_erc20_tokens(insight, chain=self.CHAIN_ID, owner_address=self.TEST_ADDRESS)
+
+        assert isinstance(result, dict)
+        assert "data" in result
+
+    def test_get_erc721_tokens(self, insight: Insight):
+        get_erc721_tokens = insight.get_erc721_tokens.__wrapped__
+        result = get_erc721_tokens(insight, chain=self.CHAIN_ID, owner_address=self.TEST_ADDRESS)
+
+        assert isinstance(result, dict)
+        assert "data" in result
+
+    def test_get_erc1155_tokens(self, insight: Insight):
+        get_erc1155_tokens = insight.get_erc1155_tokens.__wrapped__
+        result = get_erc1155_tokens(insight, chain=self.CHAIN_ID, owner_address=self.TEST_ADDRESS)
+
+        assert isinstance(result, dict)
+        assert "data" in result
+
+    def test_get_token_prices(self, insight: Insight):
+        get_token_prices = insight.get_token_prices.__wrapped__
+        result = get_token_prices(insight, chain=self.CHAIN_ID, token_addresses=[self.TEST_ADDRESS])
+
+        assert isinstance(result, dict)
+        assert "data" in result
+
+    def test_get_contract_metadata(self, insight: Insight):
+        get_contract_metadata = insight.get_contract_metadata.__wrapped__
+        result = get_contract_metadata(insight, chain=self.CHAIN_ID, contract_address=self.TEST_ADDRESS)
+
+        assert isinstance(result, dict)
+        assert "data" in result
+
+    def test_get_nfts(self, insight: Insight):
+        get_nfts = insight.get_nfts.__wrapped__
+        result = get_nfts(insight, chain=self.CHAIN_ID, contract_address=self.TEST_ADDRESS)
+
+        assert isinstance(result, dict)
+        assert "data" in result
+
+    def test_get_nft_owners(self, insight: Insight):
+        get_nft_owners = insight.get_nft_owners.__wrapped__
+        result = get_nft_owners(insight, chain=self.CHAIN_ID, contract_address=self.TEST_ADDRESS)
+
+        assert isinstance(result, dict)
+        assert "data" in result
+
+    def test_get_nft_transfers(self, insight: Insight):
+        get_nft_transfers = insight.get_nft_transfers.__wrapped__
+        result = get_nft_transfers(insight, chain=self.CHAIN_ID, contract_address=self.TEST_ADDRESS)
+
+        assert isinstance(result, dict)
+        assert "data" in result
+
+    def test_resolve(self, insight: Insight):
+        resolve = insight.resolve.__wrapped__
+        result = resolve(insight, chain=self.CHAIN_ID, input_data=self.TEST_DOMAIN)
+
+        assert isinstance(result, dict)
+        assert "data" in result
