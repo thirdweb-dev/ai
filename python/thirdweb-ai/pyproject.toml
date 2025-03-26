@@ -19,9 +19,6 @@ dependencies = [
     "pydantic>=2.10.6,<3",
     "jsonref>=1.1.0,<2",
     "httpx>=0.28.1,<0.29",
-    "langchain-core>=0.3.47",
-    "llama-index-core>=0.12.25",
-    "pytest-cov>=4.1.0",
 ]
 
 [project.optional-dependencies]
