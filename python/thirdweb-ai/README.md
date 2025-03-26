@@ -146,6 +146,10 @@ def adapt_to_my_framework(tools: list[Tool]):
 
 This project is licensed under the Apache License 2.0 - see the LICENSE file for details.
 
+# Development and Testing
+
+### Setting up the development environment
+
 ```bash
 git clone https://github.com/thirdweb-dev/ai.git
 cd ad/python/thirdweb-ai
