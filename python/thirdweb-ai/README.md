@@ -148,11 +148,11 @@ This project is licensed under the Apache License 2.0 - see the LICENSE file for
 
 # Development and Testing
 
-### Setting up the development environment
+### Setting up development environment
 
 ```bash
 git clone https://github.com/thirdweb-dev/ai.git
-cd ad/python/thirdweb-ai
+cd ai/python/thirdweb-ai
 
 # Install dependencies with UV
 uv sync
