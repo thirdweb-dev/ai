@@ -101,4 +101,3 @@ class TestEngine:
         )
 
         assert isinstance(result, dict)
-
