@@ -18,8 +18,8 @@ def insight():
 
 class TestInsight:
     # Constants
-    CHAIN_ID = 84532
-    TEST_ADDRESS = "0xC22166664e820cdA6bf4cedBdbb4fa1E6A84C440"
+    CHAIN_ID = 1
+    TEST_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7"
     TEST_DOMAIN = "thirdweb.eth"
     DEFAULT_LIMIT = 5
 
@@ -90,14 +90,16 @@ class TestInsight:
 
     def test_get_nft_owners(self, insight: Insight):
         get_nft_owners = insight.get_nft_owners.__wrapped__
-        result = get_nft_owners(insight, chain=self.CHAIN_ID, contract_address=self.TEST_ADDRESS)
+        result = get_nft_owners(insight, chain=self.CHAIN_ID, contract_address=self.TEST_ADDRESS, limit=self.DEFAULT_LIMIT)
 
         assert isinstance(result, dict)
         assert "data" in result
 
     def test_get_nft_transfers(self, insight: Insight):
         get_nft_transfers = insight.get_nft_transfers.__wrapped__
-        result = get_nft_transfers(insight, chain=self.CHAIN_ID, contract_address=self.TEST_ADDRESS)
+        result = get_nft_transfers(
+            insight, chain=self.CHAIN_ID, contract_address=self.TEST_ADDRESS, limit=self.DEFAULT_LIMIT
+        )
 
         assert isinstance(result, dict)
         assert "data" in result
