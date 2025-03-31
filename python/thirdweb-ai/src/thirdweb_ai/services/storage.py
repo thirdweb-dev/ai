@@ -1,5 +1,6 @@
 import hashlib
-import json
+import mimetypes
+from io import BytesIO
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -26,7 +27,7 @@ class Storage(Service):
             return {"error": "Invalid IPFS hash"}
 
         ipfs_hash = ipfs_hash.removeprefix("ipfs://")
-        path = f"https://{self.gateway_url}.thirdwebstorage.com/ipfs/{ipfs_hash}"
+        path = f"https://{self.gateway_url}.ipfscdn.io/ipfs/{ipfs_hash}"
         return self._get(path)
 
     def _post_file(self, url: str, files: dict[str, Any]) -> dict[str, Any]:
@@ -39,29 +40,18 @@ class Storage(Service):
         response.raise_for_status()
         return response.json()
 
-    @tool(description="Upload JSON data to IPFS. Stores JSON objects on decentralized storage and returns an IPFS URI.")
-    def upload_ipfs_json(
-        self,
-        json_data: Annotated[
-            dict[str, Any], "The JSON data to upload to IPFS. Can be any valid JSON object with nested structures."
-        ],
-    ) -> str:
-        """Upload JSON data to IPFS and return the IPFS hash."""
-        storage_url = f"{self.base_url}/upload"
-        files = {"file": ("file.json", json.dumps(json_data).encode(), "application/json")}
-        body = self._post_file(storage_url, files)
-        return f"ipfs://{body['IpfsHash']}/0"
-
     @tool(description="Upload a file to IPFS. Stores any file type on decentralized storage and returns an IPFS URI.")
     def upload_ipfs_file(
         self,
-        file_path: Annotated[Path, "The path to the file to upload. Should be a valid file path to an existing file."],
+        file_path: Annotated[str, "Path to the file to upload."],
     ) -> str:
-        """Upload a file to IPFS and return the IPFS hash."""
+        """Upload a file (e.g., image, JSON, or any binary data) to IPFS and return the IPFS hash."""
         storage_url = f"{self.base_url}/upload"
 
-        with Path.open(file_path, "rb") as file_content:
-            files = {"file": (file_path.name, file_content, "application/octet-stream")}
-            body = self._post_file(storage_url, files)
+        with Path.open(Path(file_path), "rb") as f:
+            file_bytes = f.read()
 
-        return f"ipfs://{body['IpfsHash']}/0"
+        content_type = mimetypes.guess_type(file_path)[0] or "application/octet-stream"
+        files = {"file": (file_path, BytesIO(file_bytes), content_type)}
+        body = self._post_file(storage_url, files)
+        return f"ipfs://{body['IpfsHash']}"
