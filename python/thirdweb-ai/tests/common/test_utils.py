@@ -35,9 +35,3 @@ class TestNormalizeChainId:
 
         with pytest.raises(ValueError, match="does not contain any digits"):
             normalize_chain_id(["ethereum", "polygon"])
-
-    def test_invalid_digit_string(self):
-        # This test is for completeness, but the current implementation
-        # doesn't trigger this error case since re.search('\d+') always
-        # returns a valid digit string if it matches
-        pass

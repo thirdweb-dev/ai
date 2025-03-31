@@ -1,14 +1,7 @@
-import importlib.util
-
 import pytest
 
+from thirdweb_ai.common.utils import has_module
 from thirdweb_ai.tools.tool import Tool
-
-
-def has_module(module_name: str) -> bool:
-    """Check if module is available."""
-    return importlib.util.find_spec(module_name) is not None
-
 
 # Skip if langchain-core is not installed
 langchain_installed = has_module("langchain_core")
@@ -17,7 +10,7 @@ langchain_installed = has_module("langchain_core")
 @pytest.mark.skipif(not langchain_installed, reason="langchain-core not installed")
 def test_get_langchain_tools(test_tools: list[Tool]):
     """Test converting thirdweb tools to LangChain tools."""
-    from langchain_core.tools.structured import StructuredTool
+    from langchain_core.tools.structured import StructuredTool  # type: ignore[import]
 
     from thirdweb_ai.adapters.langchain import get_langchain_tools
 

@@ -1,4 +1,10 @@
+import importlib.util
 import re
+
+
+def has_module(module_name: str) -> bool:
+    """Check if module is available."""
+    return importlib.util.find_spec(module_name) is not None
 
 
 def extract_digits(value: int | str) -> int:
