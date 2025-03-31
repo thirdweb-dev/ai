@@ -1,6 +1,6 @@
 from typing import Annotated, Any
 
-from thirdweb_ai.common.utils import normalize_chain_id
+from thirdweb_ai.common.utils import clean_resolve, normalize_chain_id
 from thirdweb_ai.services.service import Service
 from thirdweb_ai.tools.tool import tool
 
@@ -442,16 +442,17 @@ class Insight(Service):
         normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
         if normalized_chain:
             params["chain"] = normalized_chain
-        return self._get(f"resolve/{block_identifier}", params)
+        out = self._get(f"resolve/{block_identifier}", params)
+        return clean_resolve(out)
 
     @tool(
-        description="Look up information for a wallet or contract address. Use this when asked about a specific Ethereum address (e.g., '0x1234...') to get account details including balance, transaction count, and contract verification status. This tool is specifically for addresses (accounts and contracts), NOT transaction hashes or ENS names."
+        description="Look up transactions for a wallet or contract address. Use this when asked about a specific Ethereum address (e.g., '0x1234...') to get account details including balance, transaction count, and contract verification status. This tool is specifically for addresses (accounts and contracts), NOT transaction hashes or ENS names."
     )
-    def lookup_blockchain_address(
+    def get_address_transactions(
         self,
         address: Annotated[
             str,
-            "Wallet or contract address to look up (e.g., '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045' for Vitalik's address). Must be a valid blockchain address starting with 0x and 42 characters long. Use this for queries like 'tell me about this address' or 'what's in this wallet 0x1234...'.",
+            "Wallet or contract address to look up (e.g., '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045' for Vitalik's address). Must be a valid blockchain address starting with 0x and 42 characters long.",
         ],
         chain: Annotated[
             list[int | str] | int | str | None,
@@ -462,16 +463,17 @@ class Insight(Service):
         normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
         if normalized_chain:
             params["chain"] = normalized_chain
-        return self._get(f"resolve/{address}", params)
+        out = self._get(f"resolve/{address}", params)
+        return clean_resolve(out)
 
     @tool(
-        description="Resolve an ENS name to its corresponding Ethereum address. Use this when asked about an ENS domain name (anything ending in .eth like 'vitalik.eth') to find the wallet address it points to. This tool is specifically for ENS domains, NOT addresses, transaction hashes, or contract queries."
+        description="Look up transactions associated with an ENS domain name (anything ending in .eth like 'vitalik.eth'). This tool is specifically for ENS domains, NOT addresses, transaction hashes, or contract queries."
     )
-    def resolve_ens_name(
+    def get_ens_transactions(
         self,
         ens_name: Annotated[
             str,
-            "ENS name to resolve (e.g., 'vitalik.eth', 'thirdweb.eth'). Must be a valid ENS domain ending with .eth or a subdomain. Use this for queries like 'who owns vitalik.eth' or 'what address does name.eth resolve to'.",
+            "ENS name to resolve (e.g., 'vitalik.eth', 'thirdweb.eth'). Must be a valid ENS domain ending with .eth.",
         ],
         chain: Annotated[
             list[int | str] | int | str | None,
@@ -482,7 +484,8 @@ class Insight(Service):
         normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
         if normalized_chain:
             params["chain"] = normalized_chain
-        return self._get(f"resolve/{ens_name}", params)
+        out = self._get(f"resolve/{ens_name}", params)
+        return clean_resolve(out)
 
     @tool(
         description="Get detailed information about a specific transaction by its hash. Use this when asked to analyze, look up, check, or get details about a transaction hash (e.g., 'What can you tell me about this transaction: 0x5407ea41...'). This tool specifically deals with transaction hashes (txid/txhash), NOT addresses, contracts, or ENS names."
@@ -502,7 +505,8 @@ class Insight(Service):
         normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
         if normalized_chain:
             params["chain"] = normalized_chain
-        return self._get(f"resolve/{transaction_hash}", params)
+        out = self._get(f"resolve/{transaction_hash}", params)
+        return clean_resolve(out)
 
     @tool(
         description="Decode a function or event signature. Use this when you need to understand what a specific function selector or event signature does and what parameters it accepts."
@@ -522,4 +526,5 @@ class Insight(Service):
         normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
         if normalized_chain:
             params["chain"] = normalized_chain
-        return self._get(f"resolve/{signature}", params)
+        out = self._get(f"resolve/{signature}", params)
+        return clean_resolve(out)
