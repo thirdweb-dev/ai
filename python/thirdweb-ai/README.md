@@ -189,3 +189,26 @@ uv run ruff check .
 # Run type checking with pyright
 uv run pyright
 ```
+
+### Making Changes
+
+1. Create a feature branch
+2. Make your changes
+3. Add a news fragment in `newsfragments/` folder:
+   - Name it `<issue_number>.<type>.md` (e.g., `123.feature.md`)
+   - Types: `feature`, `bugfix`, `performance`, `doc`, `removal`, `misc`
+   - Write a short description of your change
+4. Run tests and ensure they pass
+5. Submit a pull request
+
+### Release Process
+
+We use semantic-release and towncrier to handle releases:
+
+```bash
+# Preview changelog
+towncrier --draft
+
+# Build changelog (done as part of release process)
+towncrier
+```

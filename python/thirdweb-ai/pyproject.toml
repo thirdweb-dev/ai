@@ -19,6 +19,7 @@ dependencies = [
     "pydantic>=2.10.6,<3",
     "jsonref>=1.1.0,<2",
     "httpx>=0.28.1,<0.29",
+    "towncrier>=24.8.0",
 ]
 
 [project.optional-dependencies]
@@ -132,3 +133,42 @@ changelog_sections = [
     {"type" = "refactor", "section" = "Code Refactoring"},
 ]
 major_on_zero = false
+
+[tool.towncrier]
+package = "thirdweb_ai"
+package_dir = "src"
+filename = "CHANGELOG.md"
+directory = "newsfragments"
+title_format = "## [{version}] - {project_date}"
+issue_format = "[#{issue}](https://github.com/thirdweb-dev/thirdweb-ai/issues/{issue})"
+underlines = ["", "", ""]
+
+[[tool.towncrier.type]]
+directory = "feature"
+name = "Features"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "bugfix"
+name = "Bug Fixes"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "performance"
+name = "Performance Improvements"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "doc"
+name = "Documentation"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "removal"
+name = "Removals"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "misc"
+name = "Miscellaneous"
+showcontent = true
