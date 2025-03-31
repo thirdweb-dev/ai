@@ -1,15 +1,11 @@
 import pytest
 
-from thirdweb_ai.common.utils import has_module
 from thirdweb_ai.tools.tool import Tool
 
-# Skip if autogen-core is not installed
-autogen_installed = has_module("autogen_core")
 
-
-@pytest.mark.skipif(not autogen_installed, reason="autogen-core not installed")
 def test_get_autogen_tools(test_tools: list[Tool]):
     """Test converting thirdweb tools to AutoGen tools."""
+    pytest.importorskip("autogen_core")
     from autogen_core.tools import BaseTool as AutogenBaseTool  # type: ignore[import]
 
     from thirdweb_ai.adapters.autogen import get_autogen_tools

@@ -1,16 +1,16 @@
 import pytest
+from coinbase_agentkit import (
+    EthAccountWalletProvider,
+    EthAccountWalletProviderConfig,
+)
+from eth_account import Account
 
-from thirdweb_ai.common.utils import has_module
 from thirdweb_ai.tools.tool import Tool
 
-# Skip if coinbase_agentkit is not installed
-coinbase_agentkit_installed = has_module("coinbase_agentkit")
 
-
-@pytest.mark.skipif(not coinbase_agentkit_installed, reason="coinbase-agentkit not installed")
 def test_get_coinbase_agentkit_tools(test_tools: list[Tool]):
     """Test converting thirdweb tools to Coinbase AgentKit tools."""
-    # Import needed here to avoid import errors if module is not installed
+    pytest.importorskip("coinbase_agentkit")
     from coinbase_agentkit import ActionProvider  # type: ignore[import]
 
     from thirdweb_ai.adapters.coinbase_agentkit import ThirdwebActionProvider, thirdweb_action_provider
@@ -25,11 +25,20 @@ def test_get_coinbase_agentkit_tools(test_tools: list[Tool]):
     # Check provider name
     assert provider.name == "thirdweb"
 
+    account = Account.create()
+    # Initialize Ethereum Account Wallet Provider
+    wallet_provider = EthAccountWalletProvider(
+        config=EthAccountWalletProviderConfig(
+            account=account,
+            chain_id="8453",  # Base mainnet
+            rpc_url="https://8453.rpc.thirdweb.com",
+        )
+    )
+    actions = provider.get_actions(wallet_provider=wallet_provider)
     # Check provider has the expected number of actions
-    assert len(provider.get_actions()) == len(test_tools)
+    assert len(actions) == len(test_tools)
 
     # Check properties were preserved by getting actions and checking names/descriptions
-    actions = provider.get_actions()
     assert [action.name for action in actions] == [tool.name for tool in test_tools]
     assert [action.description for action in actions] == [tool.description for tool in test_tools]
 

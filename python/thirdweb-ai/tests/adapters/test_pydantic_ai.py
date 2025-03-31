@@ -1,15 +1,11 @@
 import pytest
 
-from thirdweb_ai.common.utils import has_module
 from thirdweb_ai.tools.tool import Tool
 
-# Skip if pydantic-ai is not installed
-pydantic_ai_installed = has_module("pydantic_ai")
 
-
-@pytest.mark.skipif(not pydantic_ai_installed, reason="pydantic-ai not installed")
 def test_get_pydantic_ai_tools(test_tools: list[Tool]):
     """Test converting thirdweb tools to Pydantic AI tools."""
+    pytest.importorskip("pydantic_ai")
     from pydantic_ai import Tool as PydanticTool  # type: ignore[import]
 
     from thirdweb_ai.adapters.pydantic_ai import get_pydantic_ai_tools

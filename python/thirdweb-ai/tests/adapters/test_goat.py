@@ -1,13 +1,8 @@
 import pytest
 
-from thirdweb_ai.common.utils import has_module
 from thirdweb_ai.tools.tool import Tool
 
-# Skip if goat is not installed
-goat_installed = has_module("goat-sdk")
 
-
-@pytest.mark.skipif(not goat_installed, reason="goat not installed")
 def test_get_goat_tools(test_tools: list[Tool]):
     """Test converting thirdweb tools to GOAT tools."""
     # Skip this test if module not fully installed

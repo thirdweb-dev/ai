@@ -3,14 +3,9 @@ import pytest
 from thirdweb_ai.common.utils import has_module
 from thirdweb_ai.tools.tool import Tool
 
-# Skip if mcp is not installed
-mcp_installed = has_module("mcp")
 
-
-@pytest.mark.skipif(not mcp_installed, reason="mcp not installed")
 def test_get_mcp_tools(test_tools: list[Tool]):
     """Test converting thirdweb tools to MCP tools."""
-    # Skip this test if module not fully installed
     pytest.importorskip("mcp.types")
 
     import mcp.types as mcp_types  # type: ignore[import]

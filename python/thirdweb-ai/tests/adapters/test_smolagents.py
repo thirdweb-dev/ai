@@ -1,16 +1,10 @@
 import pytest
 
-from thirdweb_ai.common.utils import has_module
 from thirdweb_ai.tools.tool import Tool
 
-# Skip if smolagents is not installed
-smolagents_installed = has_module("smolagents")
 
-
-@pytest.mark.skipif(not smolagents_installed, reason="smolagents not installed")
 def test_get_smolagents_tools(test_tools: list[Tool]):
     """Test converting thirdweb tools to SmolaGents tools."""
-    # Skip this test if module not fully installed
     pytest.importorskip("smolagents")
 
     from smolagents import Tool as SmolagentTool  # type: ignore[import]
