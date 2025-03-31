@@ -1,4 +1,5 @@
 import re
+from typing import Any
 
 
 def extract_digits(value: int | str) -> int:
@@ -27,3 +28,18 @@ def normalize_chain_id(
         return [extract_digits(c) for c in in_value]
 
     return extract_digits(in_value)
+
+
+def decode_abi_data(encoded_data: str) -> bytes:
+    encoded_data = encoded_data.removeprefix("0x")
+    return bytes.fromhex(encoded_data)
+
+
+def clean_resolve(out: dict[str, Any]):
+    if "transactions" in out["data"]:
+        for transaction in out["data"]["transactions"]:
+            if "data" in transaction:
+                transaction["data"] = decode_abi_data(transaction["data"])
+            if "logs_bloom" in transaction:
+                transaction.pop("logs_bloom")
+    return out
