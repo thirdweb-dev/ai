@@ -1,6 +1,5 @@
 import pytest
 
-from thirdweb_ai.common.utils import has_module
 from thirdweb_ai.tools.tool import Tool
 
 
