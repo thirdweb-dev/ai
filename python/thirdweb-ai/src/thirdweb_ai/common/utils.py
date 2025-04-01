@@ -1,4 +1,5 @@
 import re
+from typing import Any
 
 
 def extract_digits(value: int | str) -> int:
@@ -27,3 +28,23 @@ def normalize_chain_id(
         return [extract_digits(c) for c in in_value]
 
     return extract_digits(in_value)
+
+
+def is_encoded(encoded_data: str) -> bool:
+    encoded_data = encoded_data.removeprefix("0x")
+
+    try:
+        bytes.fromhex(encoded_data)
+        return True
+    except ValueError:
+        return False
+
+
+def clean_resolve(out: dict[str, Any]):
+    if "transactions" in out["data"]:
+        for transaction in out["data"]["transactions"]:
+            if "data" in transaction and is_encoded(transaction["data"]):
+                transaction.pop("data")
+            if "logs_bloom" in transaction:
+                transaction.pop("logs_bloom")
+    return out
