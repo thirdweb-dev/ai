@@ -26,11 +26,14 @@ jobs:
         cache-dependency-glob: "uv.lock" # Update cache if uv.lock changes
 
     - name: Install the project
-      run: uv sync --all-extras --dev --project python/thirdweb-ai
+      run: |
+        cd python/thirdweb-ai
+        uv sync --all-extras --dev
 
     - name: Test with pytest
       run: |
-        uv run pytest python/thirdweb-ai/tests --cov=thirdweb_ai --cov-report=xml
+        cd python/thirdweb-ai
+        uv run pytest tests --cov=thirdweb_ai --cov-report=xml
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
