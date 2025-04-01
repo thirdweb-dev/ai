@@ -27,8 +27,9 @@ async def async_read_file_chunks(file_path: str | Path, chunk_size: int = 8192) 
 
 class Storage(Service):
     def __init__(self, secret_key: str):
-        super().__init__(base_url="https://storage.thirdweb.com/ipfs", secret_key=secret_key)
+        super().__init__(base_url="https://storage.thirdweb.com", secret_key=secret_key)
         self.gateway_url = self._get_gateway_url()
+        self.gateway_hostname = "ipfscdn.io"
 
     def _get_gateway_url(self) -> str:
         return hashlib.sha256(self.secret_key.encode()).hexdigest()[:32]
@@ -44,7 +45,7 @@ class Storage(Service):
             return {"error": "Invalid IPFS hash"}
 
         ipfs_hash = ipfs_hash.removeprefix("ipfs://")
-        path = f"https://{self.gateway_url}.ipfscdn.io/ipfs/{ipfs_hash}"
+        path = f"https://{self.gateway_url}.{self.gateway_hostname}.ipfscdn.io/ipfs/{ipfs_hash}"
         return self._get(path)
 
     async def _async_post_file(self, url: str, files: dict[str, Any]) -> dict[str, Any]:
@@ -113,7 +114,6 @@ class Storage(Service):
         data: Annotated[
             Any, "Data to upload: can be a file path, directory path, dict, dataclass, or BaseModel instance."
         ],
-        chunk_size: Annotated[int, "Size of chunks to read from file."] = 8192,
     ) -> str:
         """
         Upload data to IPFS and return the IPFS hash.
@@ -127,7 +127,7 @@ class Storage(Service):
 
         Always uses streaming for file uploads to handle large files efficiently.
         """
-        storage_url = f"{self.base_url}/upload"
+        storage_url = f"{self.base_url}/ipfs/upload"
 
         # Handle JSON-serializable data types
         if self._is_json_serializable(data):
@@ -146,7 +146,7 @@ class Storage(Service):
 
                 # Create a buffer to hold chunks for streaming upload
                 buffer = BytesIO()
-                async for chunk in async_read_file_chunks(path, chunk_size):
+                async for chunk in async_read_file_chunks(path):
                     buffer.write(chunk)
 
                 buffer.seek(0)  # Reset buffer position
@@ -157,7 +157,7 @@ class Storage(Service):
             # Directory upload - preserve directory structure
             if path.is_dir():
                 # Prepare all files from the directory with preserved structure
-                files_data = await self._prepare_directory_files(path, chunk_size)
+                files_data = await self._prepare_directory_files(path)
 
                 if not files_data:
                     raise ValueError(f"Directory is empty: {data}")
@@ -171,6 +171,12 @@ class Storage(Service):
 
             raise ValueError(f"Path exists but is neither a file nor a directory: {data}")
 
-        raise ValueError(
-            f"Unsupported data type: {type(data)}. Must be a valid file/directory path, dict, dataclass, or BaseModel."
-        )
+        try:
+            content_type = mimetypes.guess_type(data)[0] or "application/octet-stream"
+            files = {"file": ("data.txt", BytesIO(data.encode()), content_type)}
+            body = await self._async_post_file(storage_url, files)
+            return f"ipfs://{body['IpfsHash']}"
+        except TypeError as e:
+            raise TypeError(
+                f"Unsupported data type: {type(data)}. Must be a valid file/directory path, dict, dataclass, or BaseModel."
+            ) from e
