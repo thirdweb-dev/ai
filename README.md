@@ -4,7 +4,7 @@ _AI Agents with Onchain Intelligence_
 
 ## 📖 Overview
 
-thirdweb AI is thirdweb's comprehensive toolkit for blockchain data analysis, wallet management, and AI agent interaction with blockchains. It simplifies complex blockchain operations into three core components: Insight for data analysis, Engine for wallet and contract operations, and Nebula for natural language-powered blockchain interactions.
+thirdweb AI is thirdweb's comprehensive toolkit for blockchain data analysis, wallet management, and AI agent interaction with blockchains. It simplifies complex blockchain operations into four core components: Insight for data analysis, Engine for wallet and contract operations, Storage for decentralized file management, and Nebula for natural language-powered blockchain interactions.
 
 ## 🌐 Features
 
@@ -22,6 +22,11 @@ Core blockchain interaction capabilities:
 - **Wallet**: Secure wallet management and transaction signing
 - **Read**: Read operations for smart contracts and blockchain data
 - **Write**: Transaction creation and contract interaction
+
+### Storage
+Decentralized storage capabilities:
+- **Upload**: Upload files, directories, and JSON data to IPFS
+- **Fetch**: Retrieve content from IPFS using thirdweb gateway
 
 ### Nebula
 AI agent blockchain interaction:
@@ -68,18 +73,20 @@ See the list of [supported framework and installation guides](python/thirdweb-ai
 #### Basic Usage
 
 ```python
-from thirdweb_ai import Engine, Insight, Nebula, Tool
+from thirdweb_ai import Engine, Insight, Nebula, Storage, Tool
 
 # Initialize services
 insight = Insight(secret_key=...)
 nebula = Nebula(secret_key=...)
 engine = Engine(...)
+storage = Storage(secret_key=...)
 
 # Example: Create tools for AI agents
 tools = [
     *insight.get_tools(),
     *nebula.get_tools(),
     *engine.get_tools(),
+    *storage.get_tools(),
     # Or pick an individual tool from the services
 ]
 
