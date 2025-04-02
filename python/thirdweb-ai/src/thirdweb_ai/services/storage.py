@@ -45,7 +45,7 @@ class Storage(Service):
             return {"error": "Invalid IPFS hash"}
 
         ipfs_hash = ipfs_hash.removeprefix("ipfs://")
-        path = f"https://{self.gateway_url}.{self.gateway_hostname}.ipfscdn.io/ipfs/{ipfs_hash}"
+        path = f"https://{self.gateway_url}.{self.gateway_hostname}/ipfs/{ipfs_hash}"
         return self._get(path)
 
     async def _async_post_file(self, url: str, files: dict[str, Any]) -> dict[str, Any]:
