@@ -7,7 +7,6 @@ from io import BytesIO
 from pathlib import Path
 from typing import Annotated, Any
 
-import requests
 from pydantic import BaseModel
 
 from thirdweb_ai.services.service import Service
@@ -75,10 +74,9 @@ class Storage(Service):
     def _post_file(self, url: str, files: dict[str, Any]) -> dict[str, Any]:
         """Post files to a URL with proper authorization headers."""
         headers = self._make_headers()
-        # Remove the Content-Type as requests will set it correctly for multipart/form-data
         headers.pop("Content-Type", None)
 
-        response = requests.post(url, files=files, headers=headers)
+        response = self.client.post(url, files=files, headers=headers)
         response.raise_for_status()
         return response.json()
 

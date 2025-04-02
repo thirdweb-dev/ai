@@ -3419,14 +3419,13 @@ wheels = [
 
 [[package]]
 name = "thirdweb-ai"
-version = "0.1.8"
+version = "0.1.9"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },
     { name = "httpx" },
     { name = "jsonref" },
     { name = "pydantic" },
-    { name = "requests" },
 ]
 
 [package.optional-dependencies]
@@ -3503,7 +3502,6 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.10.6,<3" },
     { name = "pydantic-ai", marker = "extra == 'all'", specifier = ">=0.0.39" },
     { name = "pydantic-ai", marker = "extra == 'pydantic-ai'", specifier = ">=0.0.39" },
-    { name = "requests", specifier = ">=2.32.3" },
     { name = "smolagents", marker = "extra == 'all'", specifier = ">=1.10.0" },
     { name = "smolagents", marker = "extra == 'smolagents'", specifier = ">=1.10.0" },
 ]
