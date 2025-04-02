@@ -9,6 +9,7 @@ thirdweb MCP provides a unified interface to access thirdweb's suite of blockcha
 - **Nebula**: Autonomous onchain execution - real-time on-chain analysis, code generation and contract interactions
 - **Insight**: Blockchain data analysis capabilities for real-time on-chain data
 - **Engine**: Integration with thirdweb's backend infrastructure for contract deployments and interactions
+- **Storage**: Decentralized storage capabilities for uploading and retrieving data via IPFS
 
 ## Installation
 
@@ -44,7 +45,7 @@ uv sync
 
 The thirdweb MCP server requires configuration based on which services you want to enable:
 
-1. **thirdweb Secret Key**: Required for Nebula and Insight services. Obtain from the [thirdweb dashboard](https://thirdweb.com/dashboard).
+1. **thirdweb Secret Key**: Required for Nebula, Insight, and Storage services. Obtain from the [thirdweb dashboard](https://thirdweb.com/dashboard).
 2. **Chain IDs**: Blockchain network IDs to connect to (e.g., 1 for Ethereum mainnet, 137 for Polygon).
 3. **Engine Configuration**: If using the Engine service, you'll need the Engine URL and authentication JWT.
 
@@ -140,6 +141,13 @@ Integrates with thirdweb's backend infrastructure:
 - Deploy smart contracts
 - Interact with deployed contracts
 - Manage wallet connections and transactions
+
+### Storage
+
+Provides decentralized storage functionality:
+- Upload files, directories, and JSON data to IPFS
+- Retrieve content from IPFS using thirdweb gateway
+- Preserve directory structures when uploading
 
 ## License
 
