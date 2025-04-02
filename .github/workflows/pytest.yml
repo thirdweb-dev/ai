@@ -31,6 +31,8 @@ jobs:
         uv sync --all-extras --dev
 
     - name: Test with pytest
+      env:
+        __THIRDWEB_SECRET_KEY_DEV: ${{ secrets.__THIRDWEB_SECRET_KEY_DEV }}
       run: |
         cd python/thirdweb-ai
         uv run pytest tests --cov=thirdweb_ai --cov-report=xml
