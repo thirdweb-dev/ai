@@ -1,9 +1,11 @@
 import os
+from typing import Literal
 
 import click
 from thirdweb_ai import Engine, Insight, Nebula, Storage
 from thirdweb_ai.adapters.mcp import add_fastmcp_tools
 
+__version__ = "0.1.13"
 from mcp.server.fastmcp import FastMCP
 
 
@@ -56,16 +58,17 @@ from mcp.server.fastmcp import FastMCP
 )
 def main(
     port: int,
-    transport: str,
+    transport: Literal["stdio", "sse"],
     secret_key: str,
-    chain_id: list[int],
+    chain_id: list[int | str],
     engine_url: str,
     engine_auth_jwt: str,
     engine_backend_wallet_address: str | None,
 ):
     mcp = FastMCP("thirdweb MCP", port=port)
 
-    chain_ids = [int(chain_id) for chain_id in chain_id]
+    # Convert chain_id from tuple to list
+    chain_ids = list(chain_id)
 
     # determine which services to enable based on the provided options
     services = []
