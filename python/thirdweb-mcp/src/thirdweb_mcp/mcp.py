@@ -2,11 +2,11 @@ import os
 from typing import Literal
 
 import click
-from mcp.server.fastmcp import FastMCP
-from thirdweb_ai import Engine, Insight, Nebula
+from thirdweb_ai import Engine, Insight, Nebula, Storage
 from thirdweb_ai.adapters.mcp import add_fastmcp_tools
 
-__version__ = "0.1.7"
+__version__ = "0.1.13"
+from mcp.server.fastmcp import FastMCP
 
 
 @click.command()
@@ -28,7 +28,7 @@ __version__ = "0.1.7"
     "--secret-key",
     type=str,
     default=lambda: os.getenv("THIRDWEB_SECRET_KEY"),
-    help="Your thirdweb API secret key for authentication. Required for nebula and insight services. Can be obtained from the thirdweb dashboard. Falls back to THIRDWEB_SECRET_KEY environment variable if not specified.",
+    help="Your thirdweb API secret key for authentication. Required for nebula, insight, and storage services. Can be obtained from the thirdweb dashboard. Falls back to THIRDWEB_SECRET_KEY environment variable if not specified.",
 )
 @click.option(
     "--chain-id",
@@ -73,7 +73,7 @@ def main(
     # determine which services to enable based on the provided options
     services = []
     if secret_key:
-        services.extend(["nebula", "insight"])
+        services.extend(["nebula", "insight", "storage"])
 
     if engine_url and engine_auth_jwt:
         services.append("engine")
@@ -91,6 +91,10 @@ def main(
     if "insight" in services:
         insight = Insight(secret_key=secret_key, chain_id=chain_ids)
         add_fastmcp_tools(mcp, insight.get_tools())
+
+    if "storage" in services:
+        storage = Storage(secret_key=secret_key)
+        add_fastmcp_tools(mcp, storage.get_tools())
 
     if "engine" in services:
         engine = Engine(

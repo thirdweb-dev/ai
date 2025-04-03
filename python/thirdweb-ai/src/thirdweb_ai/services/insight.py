@@ -1,6 +1,6 @@
 from typing import Annotated, Any
 
-from thirdweb_ai.common.utils import normalize_chain_id
+from thirdweb_ai.common.utils import clean_resolve, normalize_chain_id
 from thirdweb_ai.services.service import Service
 from thirdweb_ai.tools.tool import tool
 
@@ -12,7 +12,7 @@ class Insight(Service):
         self.chain_ids = normalized if isinstance(normalized, list) else [normalized]
 
     @tool(
-        description="Retrieve blockchain events with flexible filtering options. Use this to search for specific events or to analyze event patterns across multiple blocks."
+        description="Retrieve blockchain events with flexible filtering options. Use this to search for specific events or to analyze event patterns across multiple blocks. Do not use this tool to simply look up a single transaction."
     )
     def get_all_events(
         self,
@@ -20,7 +20,7 @@ class Insight(Service):
             list[int | str] | int | str | None,
             "Chain ID(s) to query (e.g., 1 for Ethereum Mainnet, 137 for Polygon). Specify multiple IDs as a list [1, 137] for cross-chain queries (max 5).",
         ] = None,
-        address: Annotated[
+        contract_address: Annotated[
             str | None,
             "Contract address to filter events by (e.g., '0x1234...'). Only return events emitted by this contract.",
         ] = None,
@@ -55,8 +55,8 @@ class Insight(Service):
         normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
         if normalized_chain:
             params["chain"] = normalized_chain
-        if address:
-            params["filter_address"] = address
+        if contract_address:
+            params["filter_address"] = contract_address
         if block_number_gte:
             params["filter_block_number_gte"] = block_number_gte
         if block_number_lt:
@@ -294,13 +294,13 @@ class Insight(Service):
         return self._get("tokens/price", params)
 
     @tool(
-        description="Get contract ABI and metadata about a smart contract, including name, symbol, decimals, and other contract-specific information. This tool also retrieve the Application Binary Interface (ABI) for a smart contract. Essential for decoding contract data and interacting with the contract"
+        description="Get contract ABI and metadata about a smart contract, including name, symbol, decimals, and other contract-specific information. Use this when asked about a contract's functions, interface, or capabilities. This tool specifically retrieves details about deployed smart contracts (NOT regular wallet addresses or transaction hashes)."
     )
     def get_contract_metadata(
         self,
         contract_address: Annotated[
             str,
-            "The contract address to get metadata for (e.g., '0x1234...'). Works for tokens and other contract types.",
+            "The contract address to get metadata for (e.g., '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' for WETH). Must be a deployed smart contract address (not a regular wallet). Use this for queries like 'what functions does this contract have' or 'get the ABI for contract 0x1234...'.",
         ],
         chain: Annotated[
             list[int | str] | int | str | None,
@@ -425,13 +425,55 @@ class Insight(Service):
         return self._get(f"nfts/transfers/{contract_address}", params)
 
     @tool(
-        description="Search and analyze blockchain input data: block number, transaction or block hash, wallet or contract address, event signature or function selector. It returns a detailed analyzed information about the input data."
+        description="Get detailed information about a specific block by its number or hash. Use this when asked about blockchain blocks (e.g., 'What's in block 12345678?' or 'Tell me about this block: 0xabc123...'). This tool is specifically for block data, NOT transactions, addresses, or contracts."
     )
-    def resolve(
+    def get_block_details(
         self,
-        input_data: Annotated[
+        block_identifier: Annotated[
             str,
-            "Any blockchain input data: block number, transaction or block hash, address, event signature or function selector",
+            "Block number or block hash to look up. Can be either a simple number (e.g., '12345678') or a block hash (e.g., '0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3' for Ethereum block 0). Use for queries like 'what happened in block 14000000' or 'show me block 0xd4e56...'.",
+        ],
+        chain: Annotated[
+            list[int | str] | int | str | None,
+            "Chain ID(s) to query (e.g., 1 for Ethereum). Specify the blockchain network where the block exists.",
+        ] = None,
+    ) -> dict[str, Any]:
+        params = {}
+        normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
+        if normalized_chain:
+            params["chain"] = normalized_chain
+        out = self._get(f"resolve/{block_identifier}", params)
+        return clean_resolve(out)
+
+    @tool(
+        description="Look up transactions for a wallet or contract address. Use this when asked about a specific Ethereum address (e.g., '0x1234...') to get account details including balance, transaction count, and contract verification status. This tool is specifically for addresses (accounts and contracts), NOT transaction hashes or ENS names."
+    )
+    def get_address_transactions(
+        self,
+        address: Annotated[
+            str,
+            "Wallet or contract address to look up (e.g., '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045' for Vitalik's address). Must be a valid blockchain address starting with 0x and 42 characters long.",
+        ],
+        chain: Annotated[
+            list[int | str] | int | str | None,
+            "Chain ID(s) to query (e.g., 1 for Ethereum). Specify the blockchain network for the address.",
+        ] = None,
+    ) -> dict[str, Any]:
+        params = {}
+        normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
+        if normalized_chain:
+            params["chain"] = normalized_chain
+        out = self._get(f"resolve/{address}", params)
+        return clean_resolve(out)
+
+    @tool(
+        description="Look up transactions associated with an ENS domain name (anything ending in .eth like 'vitalik.eth'). This tool is specifically for ENS domains, NOT addresses, transaction hashes, or contract queries."
+    )
+    def get_ens_transactions(
+        self,
+        ens_name: Annotated[
+            str,
+            "ENS name to resolve (e.g., 'vitalik.eth', 'thirdweb.eth'). Must be a valid ENS domain ending with .eth.",
         ],
         chain: Annotated[
             list[int | str] | int | str | None,
@@ -442,4 +484,47 @@ class Insight(Service):
         normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
         if normalized_chain:
             params["chain"] = normalized_chain
-        return self._get(f"resolve/{input_data}", params)
+        out = self._get(f"resolve/{ens_name}", params)
+        return clean_resolve(out)
+
+    @tool(
+        description="Get detailed information about a specific transaction by its hash. Use this when asked to analyze, look up, check, or get details about a transaction hash (e.g., 'What can you tell me about this transaction: 0x5407ea41...'). This tool specifically deals with transaction hashes (txid/txhash), NOT addresses, contracts, or ENS names."
+    )
+    def get_transaction_details(
+        self,
+        transaction_hash: Annotated[
+            str,
+            "Transaction hash to look up (e.g., '0x5407ea41de24b7353d70eab42d72c92b42a44e140f930e349973cfc7b8c9c1d7'). Must be a valid transaction hash beginning with 0x and typically 66 characters long. Use this for queries like 'tell me about this transaction' or 'what happened in transaction 0x1234...'.",
+        ],
+        chain: Annotated[
+            list[int | str] | int | str | None,
+            "Chain ID(s) to query (e.g., 1 for Ethereum). Specify the blockchain network where the transaction exists.",
+        ] = None,
+    ) -> dict[str, Any]:
+        params = {}
+        normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
+        if normalized_chain:
+            params["chain"] = normalized_chain
+        out = self._get(f"resolve/{transaction_hash}", params)
+        return clean_resolve(out)
+
+    @tool(
+        description="Decode a function or event signature. Use this when you need to understand what a specific function selector or event signature does and what parameters it accepts."
+    )
+    def decode_signature(
+        self,
+        signature: Annotated[
+            str,
+            "Function or event signature to decode (e.g., '0x095ea7b3' for the approve function). Usually begins with 0x.",
+        ],
+        chain: Annotated[
+            list[int | str] | int | str | None,
+            "Chain ID(s) to query (e.g., 1 for Ethereum). Specify to improve signature lookup accuracy.",
+        ] = None,
+    ) -> dict[str, Any]:
+        params = {}
+        normalized_chain = normalize_chain_id(chain) if chain is not None else self.chain_ids
+        if normalized_chain:
+            params["chain"] = normalized_chain
+        out = self._get(f"resolve/{signature}", params)
+        return clean_resolve(out)

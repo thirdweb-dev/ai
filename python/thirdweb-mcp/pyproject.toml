@@ -9,7 +9,7 @@ license = "Apache-2.0"
 dependencies = [
     "mcp>=1.3.0,<2",
     "click>=8.1.8,<9",
-    "thirdweb-ai[mcp]==0.1.6",
+    "thirdweb-ai[mcp]==0.1.9",
 ]
 
 [project.scripts]

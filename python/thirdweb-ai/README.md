@@ -12,6 +12,7 @@ With thirdweb-ai, your AI agents can:
 - Deploy and interact with smart contracts
 - Manage wallets and transactions
 - Retrieve on-chain data
+- Store and retrieve data on decentralized storage (IPFS)
 - Access thirdweb's suite of web3 services
 
 ## Installation
@@ -48,12 +49,13 @@ pip install "thirdweb-ai[pydantic-ai]"  # For Pydantic AI
 thirdweb-ai provides a set of tools that can be integrated with various AI agent frameworks. Here's a basic example:
 
 ```python
-from thirdweb_ai import Engine, Insight, Nebula, Tool
+from thirdweb_ai import Engine, Insight, Nebula, Storage, Tool
 
 # Initialize thirdweb services
 insight = Insight(secret_key=...)
 nebula = Nebula(secret_key=...)
 engine = Engine(secret_key=...)
+storage = Storage(secret_key=...)
 
 # Get available tools
 tools = [
@@ -62,6 +64,7 @@ tools = [
     *insight.get_tools(),
     *nebula.get_tools(),
     *engine.get_tools(),
+    *storage.get_tools(),
     # Or pick an individual tool from the services
 ]
 ```

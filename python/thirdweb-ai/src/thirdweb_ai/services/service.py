@@ -12,7 +12,7 @@ class Service:
         self.base_url = base_url
         self.secret_key = secret_key
         self.client = (
-            httpx_client if httpx_client else httpx.Client(timeout=120.0, transport=httpx.HTTPTransport(retries=5))
+            httpx_client or httpx.Client(timeout=120.0, transport=httpx.HTTPTransport(retries=5))
         )
 
     def _make_headers(self):
