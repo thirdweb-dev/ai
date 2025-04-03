@@ -1,3 +1,3 @@
-from .coinbase_agentkit import thirdweb_action_provider
+from .coinbase_agentkit import ThirdwebActionProvider, thirdweb_action_provider
 
-__all__ = ["thirdweb_action_provider"]
+__all__ = ["ThirdwebActionProvider", "thirdweb_action_provider"]
