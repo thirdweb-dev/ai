@@ -3426,6 +3426,7 @@ dependencies = [
     { name = "httpx" },
     { name = "jsonref" },
     { name = "pydantic" },
+    { name = "web3" },
 ]
 
 [package.optional-dependencies]
@@ -3504,6 +3505,7 @@ requires-dist = [
     { name = "pydantic-ai", marker = "extra == 'pydantic-ai'", specifier = ">=0.0.39" },
     { name = "smolagents", marker = "extra == 'all'", specifier = ">=1.10.0" },
     { name = "smolagents", marker = "extra == 'smolagents'", specifier = ">=1.10.0" },
+    { name = "web3", specifier = ">=7.9.0" },
 ]
 provides-extras = ["all", "langchain", "goat", "openai", "autogen", "llama-index", "agentkit", "mcp", "smolagents", "pydantic-ai"]
 
