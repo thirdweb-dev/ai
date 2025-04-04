@@ -50,21 +50,21 @@ class Storage(Service):
             _headers.update(headers)
         response = self.client.get(path, params=params, headers=_headers)
         response.raise_for_status()
-        
+
         content_type = response.headers.get("Content-Type", "")
-        
+
         # Handle JSON responses
         if "application/json" in content_type:
             return response.json()
-        
+
         # Handle binary files (images, pdfs, etc)
         if content_type.startswith(("image/", "application/pdf", "application/octet-stream")):
             return {"content": response.content, "content_type": content_type}
-            
+
         # Handle text content (html, plain text, etc)
         if content_type.startswith(("text/", "application/xml")):
             return {"content": response.text, "content_type": content_type}
-            
+
         # Default fallback - try json first, then return content with type
         try:
             return response.json()
@@ -101,9 +101,7 @@ class Storage(Service):
         """Check if the string is a valid file or directory path."""
         return Path(path).exists()
 
-    def _prepare_directory_files(
-        self, directory_path: Path, chunk_size: int = 8192
-    ) -> list[tuple[str, BytesIO, str]]:
+    def _prepare_directory_files(self, directory_path: Path, chunk_size: int = 8192) -> list[tuple[str, BytesIO, str]]:
         """
         Prepare files from a directory for upload, preserving directory structure.
         Returns a list of tuples (relative_path, file_buffer, content_type).
