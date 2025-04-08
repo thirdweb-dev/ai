@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from thirdweb_ai.common.utils import extract_digits
 from thirdweb_ai.services.service import Service
@@ -34,7 +34,7 @@ class Engine(Service):
     def create_backend_wallet(
         self,
         wallet_type: Annotated[
-            str,
+            Literal["local", "smart:local"],
             "The type of backend wallet to create. Currently supported options are 'local' (stored locally in Engine's database) or 'smart:local' (for smart account wallets with advanced features). Choose 'local' for standard EOA wallets, and 'smart:local' for smart contract wallets with batching capabilities.",
         ],
         label: Annotated[
