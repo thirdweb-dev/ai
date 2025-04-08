@@ -1,6 +1,6 @@
 [project]
 name = "thirdweb-ai"
-version = "0.1.9"
+version = "0.1.10"
 description = "thirdweb AI"
 authors = [{ name = "thirdweb", email = "support@thirdweb.com" }]
 requires-python = ">=3.10,<4.0"
@@ -20,6 +20,7 @@ dependencies = [
     "jsonref>=1.1.0,<2",
     "httpx>=0.28.1,<0.29",
     "aiohttp>=3.11.14",
+    "web3>=7.9.0",
 ]
 
 [project.optional-dependencies]

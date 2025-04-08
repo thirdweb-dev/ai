@@ -1,6 +1,6 @@
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
-from thirdweb_ai.common.utils import extract_digits, normalize_chain_id
+from thirdweb_ai.common.utils import extract_digits
 from thirdweb_ai.services.service import Service
 from thirdweb_ai.tools.tool import tool
 
@@ -10,7 +10,7 @@ class Engine(Service):
         self,
         engine_url: str,
         engine_auth_jwt: str,
-        chain_id: int | str | None = None,
+        chain_id: int | None = None,
         backend_wallet_address: str | None = None,
         secret_key: str = "",
     ):
@@ -18,7 +18,7 @@ class Engine(Service):
         self.engine_url = engine_url
         self.engine_auth_jwt = engine_auth_jwt
         self.backend_wallet_address = backend_wallet_address
-        self.chain_id = normalize_chain_id(chain_id)
+        self.chain_id = chain_id
 
     def _make_headers(self):
         headers = super()._make_headers()
@@ -34,7 +34,7 @@ class Engine(Service):
     def create_backend_wallet(
         self,
         wallet_type: Annotated[
-            str,
+            Literal["local", "smart:local"],
             "The type of backend wallet to create. Currently supported options are 'local' (stored locally in Engine's database) or 'smart:local' (for smart account wallets with advanced features). Choose 'local' for standard EOA wallets, and 'smart:local' for smart contract wallets with batching capabilities.",
         ],
         label: Annotated[
@@ -76,7 +76,7 @@ class Engine(Service):
     def get_wallet_balance(
         self,
         chain_id: Annotated[
-            str | int,
+            int | None,
             "The numeric blockchain network ID to query (e.g., '1' for Ethereum mainnet, '137' for Polygon). If not provided, uses the default chain ID configured in the Engine instance.",
         ],
         backend_wallet_address: Annotated[
@@ -85,9 +85,13 @@ class Engine(Service):
         ] = None,
     ) -> dict[str, Any]:
         """Get wallet balance for native or ERC20 tokens."""
-        normalized_chain = normalize_chain_id(chain_id) or self.chain_id
+        if self.chain_id is not None and chain_id is None:
+            chain_id = self.chain_id
+        elif chain_id is None:
+            raise ValueError("chain_id is required")
+
         backend_wallet_address = backend_wallet_address or self.backend_wallet_address
-        return self._get(f"backend-wallet/{normalized_chain}/{backend_wallet_address}/get-balance")
+        return self._get(f"backend-wallet/{chain_id}/{backend_wallet_address}/get-balance")
 
     @tool(
         description="Send an on-chain transaction. This powerful function can transfer native currency (ETH, MATIC), ERC20 tokens, or execute any arbitrary contract interaction. The transaction is signed and broadcast to the blockchain automatically."
@@ -107,7 +111,7 @@ class Engine(Service):
             "The hexadecimal transaction data payload for contract interactions (e.g., '0x23b872dd...'). For simple native currency transfers, leave this empty. For ERC20 transfers or contract calls, this contains the ABI-encoded function call.",
         ],
         chain_id: Annotated[
-            str | int,
+            int | None,
             "The numeric blockchain network ID to send the transaction on (e.g., '1' for Ethereum mainnet, '137' for Polygon). If not provided, uses the default chain ID configured in the Engine instance.",
         ],
         backend_wallet_address: Annotated[
@@ -126,10 +130,14 @@ class Engine(Service):
             "data": data or "0x",
         }
 
-        normalized_chain = normalize_chain_id(chain_id) or self.chain_id
+        if self.chain_id is not None and chain_id is None:
+            chain_id = self.chain_id
+        elif chain_id is None:
+            raise ValueError("chain_id is required")
+
         backend_wallet_address = backend_wallet_address or self.backend_wallet_address
         return self._post(
-            f"backend-wallet/{normalized_chain}/send-transaction",
+            f"backend-wallet/{chain_id}/send-transaction",
             payload,
             headers={"X-Backend-Wallet-Address": backend_wallet_address},
         )
@@ -165,7 +173,7 @@ class Engine(Service):
             "An ordered list of arguments to pass to the function (e.g., [address, tokenId]). Must match the types and order expected by the function. For functions with no parameters, use an empty list or None.",
         ],
         chain_id: Annotated[
-            str | int,
+            int | None,
             "The numeric blockchain network ID where the contract is deployed (e.g., '1' for Ethereum mainnet, '137' for Polygon). If not provided, uses the default chain ID configured in the Engine instance.",
         ],
     ) -> dict[str, Any]:
@@ -174,8 +182,12 @@ class Engine(Service):
             "functionName": function_name,
             "args": function_args or [],
         }
-        normalized_chain = normalize_chain_id(chain_id) or self.chain_id
-        return self._get(f"contract/{normalized_chain}/{contract_address}/read", payload)
+        if self.chain_id is not None and chain_id is None:
+            chain_id = self.chain_id
+        elif chain_id is None:
+            raise ValueError("chain_id is required")
+
+        return self._get(f"contract/{chain_id}/{contract_address}/read", payload)
 
     @tool(
         description="Execute a state-changing function on a smart contract by sending a transaction. This allows you to modify on-chain data, such as transferring tokens, minting NFTs, or updating contract configuration. The transaction is automatically signed by your backend wallet and submitted to the blockchain."
@@ -199,7 +211,7 @@ class Engine(Service):
             "The amount of native currency (ETH, MATIC, etc.) to send with the transaction, in wei (e.g., '1000000000000000000' for 1 ETH). Required for payable functions, use '0' for non-payable functions. Default to '0'.",
         ],
         chain_id: Annotated[
-            str | int,
+            int | None,
             "The numeric blockchain network ID where the contract is deployed (e.g., '1' for Ethereum mainnet, '137' for Polygon). If not provided, uses the default chain ID configured in the Engine instance.",
         ],
     ) -> dict[str, Any]:
@@ -212,9 +224,13 @@ class Engine(Service):
         if value and value != "0":
             payload["txOverrides"] = {"value": value}
 
-        normalized_chain = normalize_chain_id(chain_id) or self.chain_id
+        if self.chain_id is not None and chain_id is None:
+            chain_id = self.chain_id
+        elif chain_id is None:
+            raise ValueError("chain_id is required")
+
         return self._post(
-            f"contract/{normalized_chain}/{contract_address}/write",
+            f"contract/{chain_id}/{contract_address}/write",
             payload,
             headers={"X-Backend-Wallet-Address": self.backend_wallet_address},
         )

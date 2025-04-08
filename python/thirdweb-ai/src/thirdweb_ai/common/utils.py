@@ -1,8 +1,33 @@
 import re
 from typing import Any
 
+TRANSACTION_KEYS_TO_KEEP = [
+    "hash",
+    "block_number",
+    "block_timestamp",
+    "from_address",
+    "to_address",
+    "value",
+    "decodedData",
+]
+EVENT_KEYS_TO_KEEP = [
+    "block_number",
+    "block_timestamp",
+    "address",
+    "transaction_hash",
+    "transaction_index",
+    "log_index",
+    "topics",
+    "data",
+    "decodedData",
+]
+
 
 def extract_digits(value: int | str) -> int:
+    """Extract the integer value from a string or return the integer directly."""
+    if isinstance(value, int):
+        return value
+
     value_str = str(value).strip("\"'")
     digit_match = re.search(r"\d+", value_str)
 
@@ -16,21 +41,8 @@ def extract_digits(value: int | str) -> int:
     return int(extracted_digits)
 
 
-def normalize_chain_id(
-    in_value: int | str | list[int | str] | None,
-) -> int | list[int] | None:
-    """Normalize str values integers."""
-
-    if in_value is None:
-        return None
-
-    if isinstance(in_value, list):
-        return [extract_digits(c) for c in in_value]
-
-    return extract_digits(in_value)
-
-
 def is_encoded(encoded_data: str) -> bool:
+    """Check if a string is a valid hexadecimal value."""
     encoded_data = encoded_data.removeprefix("0x")
 
     try:
@@ -41,6 +53,7 @@ def is_encoded(encoded_data: str) -> bool:
 
 
 def clean_resolve(out: dict[str, Any]):
+    """Clean the response from the resolve function."""
     if "transactions" in out["data"]:
         for transaction in out["data"]["transactions"]:
             if "data" in transaction and is_encoded(transaction["data"]):
@@ -48,3 +61,15 @@ def clean_resolve(out: dict[str, Any]):
             if "logs_bloom" in transaction:
                 transaction.pop("logs_bloom")
     return out
+
+
+def filter_response_keys(items: list[dict[str, Any]], keys_to_keep: list[str] | None) -> list[dict[str, Any]]:
+    """Filter the response items to only include the specified keys"""
+    if not keys_to_keep:
+        return items
+
+    for item in items:
+        keys_to_remove = [key for key in item if key not in keys_to_keep]
+        for key in keys_to_remove:
+            item.pop(key, None)
+    return items
