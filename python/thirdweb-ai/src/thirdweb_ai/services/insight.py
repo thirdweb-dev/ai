@@ -14,7 +14,7 @@ from thirdweb_ai.tools.tool import tool
 class Insight(Service):
     def __init__(self, secret_key: str, chain_id: int | list[int] | None = None):
         super().__init__(base_url="https://insight.thirdweb.com/v1", secret_key=secret_key)
-        self.chain_ids = [chain_id]
+        self.chain_ids = [chain_id or 1]
 
     @tool(
         description="Retrieve blockchain events with flexible filtering options. Use this to search for specific events or to analyze event patterns across multiple blocks. Do not use this tool to simply look up a single transaction."
