@@ -56,10 +56,9 @@ def clean_resolve(out: dict[str, Any]):
     """Clean the response from the resolve function."""
     if "transactions" in out["data"]:
         for transaction in out["data"]["transactions"]:
-            if "data" in transaction and is_encoded(transaction["data"]):
-                transaction.pop("data")
-            if "logs_bloom" in transaction:
-                transaction.pop("logs_bloom")
+            for key in list(transaction.keys()):
+                if key not in TRANSACTION_KEYS_TO_KEEP:
+                    transaction.pop(key, None)
     return out
 
 
