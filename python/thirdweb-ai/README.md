@@ -124,6 +124,45 @@ autogen_tools = get_autogen_tools(tools)
 
 More examples are available in the examples directory that can be found [here](https://github.com/thirdweb-dev/ai/tree/main/python/examples)
 
+### Structured Outputs with Nebula
+
+Nebula supports returning structured outputs through the `response_format` parameter. For example;
+
+```python
+response_format = {
+    "type": "json_schema",
+    "json_schema": {
+        "name": "example_schema",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "ens_name": {
+                    "type": "string",
+                    "description": "The ENS name being queried",
+                },
+                "balance": {
+                    "type": "integer",
+                    "description": "The balance of the address on the specified contract",
+                },
+            },
+            "required": ["ens_name", "balance"],
+        },
+    },
+}
+
+
+nebula = Nebula(
+    secret_key=os.getenv("THIRDWEB_SECRET_KEY"), response_format=response_format
+)
+```
+
+This will return the output as JSON, using the requested format. For example; "what is the balance of thirdweb.eth on contract 0xddC761FEb956Caf62dfa1c8b42e9f33Df424715A on sepolia" would give something like.
+
+```json
+{'ens_name': 'thirdweb.eth', 'balance': 3}
+```
+
+
 ## Custom Integration
 
 If you're using a framework that isn't directly supported, you can still use thirdweb-ai by creating a custom adapter. The core `Tool` class follows a standard interface that can be adapted to most frameworks:
