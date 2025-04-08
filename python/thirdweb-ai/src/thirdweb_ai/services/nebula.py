@@ -5,8 +5,10 @@ from thirdweb_ai.tools.tool import tool
 
 
 class Nebula(Service):
-    def __init__(self, secret_key: str):
+    def __init__(self, secret_key: str, response_format: dict[str, int | str] | None = None) -> None:
         super().__init__(base_url="https://nebula-api.thirdweb.com", secret_key=secret_key)
+        if response_format:
+            self.response_format = response_format
 
     @tool(
         description="Send a message to Nebula AI and get a response. This can be used for blockchain queries, contract interactions, and access to thirdweb tools."
@@ -31,6 +33,8 @@ class Nebula(Service):
             data["session_id"] = session_id
         if context:
             data["context"] = context
+        if self.response_format:
+            data["response_format"] = self.response_format
 
         return self._post("/chat", data)
 
