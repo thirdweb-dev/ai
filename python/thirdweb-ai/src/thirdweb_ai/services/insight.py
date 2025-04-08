@@ -1,12 +1,15 @@
 from typing import Annotated, Any, Literal
 
 from thirdweb_ai.common.address import (
+    EVENT_KEYS_TO_KEEP,
+    TRANSACTION_KEYS_TO_KEEP,
+    _filter_response_keys,
     validate_address,
     validate_block_identifier,
     validate_signature,
     validate_transaction_hash,
 )
-from thirdweb_ai.common.utils import clean_resolve, clean_transactions
+from thirdweb_ai.common.utils import clean_resolve
 from thirdweb_ai.services.service import Service
 from thirdweb_ai.tools.tool import tool
 
@@ -19,7 +22,7 @@ class Insight(Service):
     @tool(
         description="Retrieve blockchain events with flexible filtering options. Use this to search for specific events or to analyze event patterns across multiple blocks. Do not use this tool to simply look up a single transaction."
     )
-    def get_blockchain_events(
+    def get_events(
         self,
         chain_id: Annotated[
             list[int] | int | None,
@@ -52,7 +55,8 @@ class Insight(Service):
             params["filter_transaction_hash"] = validate_transaction_hash(transaction_hash)
         if page:
             params["page"] = page
-        return self._get("events", params)
+        out = self._get("events", params)
+        return _filter_response_keys(out["data"], EVENT_KEYS_TO_KEEP)
 
     @tool(
         description="Retrieve events from a specific contract address. Use this to analyze activity or monitor events for a particular smart contract."
@@ -123,7 +127,7 @@ class Insight(Service):
             params["page"] = page
 
         out = self._get("transactions", params)
-        return clean_transactions(out)
+        return _filter_response_keys(out["data"], TRANSACTION_KEYS_TO_KEEP)
 
     @tool(
         description="Retrieve token balances for a specified address. Lists all tokens owned with their balances, metadata, and prices. The default token type is erc20."

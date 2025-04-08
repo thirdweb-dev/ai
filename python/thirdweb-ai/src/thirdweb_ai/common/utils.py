@@ -1,6 +1,26 @@
 import re
-from datetime import datetime, timezone
 from typing import Any
+
+TRANSACTION_KEYS_TO_KEEP = [
+    "hash",
+    "block_number",
+    "block_timestamp",
+    "from_address",
+    "to_address",
+    "value",
+    "decodedData",
+]
+EVENT_KEYS_TO_KEEP = [
+    "block_number",
+    "block_timestamp",
+    "address",
+    "transaction_hash",
+    "transaction_index",
+    "log_index",
+    "topics",
+    "data",
+    "decodedData",
+]
 
 
 def extract_digits(value: int | str) -> int:
@@ -43,35 +63,13 @@ def clean_resolve(out: dict[str, Any]):
     return out
 
 
-def clean_transactions(out: dict[str, Any]):
-    """Clean and format transaction data for better LLM readability."""
-    transactions = []
-    transactions.extend(
-        {
-            "chain_id": transaction["chain_id"],
-            "hash": transaction["hash"],
-            "block_hash": transaction["block_hash"],
-            "block_number": transaction["block_number"],
-            "block_timestamp": datetime.fromtimestamp(transaction["block_timestamp"], tz=timezone.utc).strftime(
-                "%Y-%m-%d %H:%M:%S UTC"
-            ),
-            "from_address": transaction["from_address"],
-            "to_address": transaction["to_address"],
-            "value": transaction["value"],
-            "gas": transaction["gas"],
-            "gas_price": transaction["gas_price"],
-            "gas_used": transaction["gas_used"],
-            "cumulative_gas_used": transaction["cumulative_gas_used"],
-            "effective_gas_price": transaction["effective_gas_price"],
-            "blob_gas_used": transaction["blob_gas_used"],
-            "blob_gas_price": transaction["blob_gas_price"],
-            "max_fee_per_gas": transaction["max_fee_per_gas"],
-            "max_priority_fee_per_gas": transaction["max_priority_fee_per_gas"],
-            "transaction_type": transaction["transaction_type"],
-            "contract_address": transaction["contract_address"],
-            "status": transaction["status"],
-        }
-        for transaction in out["data"]
-    )
-    out["data"] = transactions
-    return out
+def _filter_response_keys(self, items: list[dict[str, Any]], keys_to_keep: list[str] | None) -> None:
+    """Filter the response items to only include the specified keys"""
+    if not keys_to_keep or not items:
+        return None
+
+    for item in items:
+        keys_to_remove = [key for key in item if key not in keys_to_keep]
+        for key in keys_to_remove:
+            item.pop(key, None)
+    return items
