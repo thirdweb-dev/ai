@@ -63,10 +63,10 @@ def clean_resolve(out: dict[str, Any]):
     return out
 
 
-def _filter_response_keys(self, items: list[dict[str, Any]], keys_to_keep: list[str] | None) -> None:
+def filter_response_keys(items: list[dict[str, Any]], keys_to_keep: list[str] | None) -> list[dict[str, Any]]:
     """Filter the response items to only include the specified keys"""
-    if not keys_to_keep or not items:
-        return None
+    if not keys_to_keep:
+        return items
 
     for item in items:
         keys_to_remove = [key for key in item if key not in keys_to_keep]
