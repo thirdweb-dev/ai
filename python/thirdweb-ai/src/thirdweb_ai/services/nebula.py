@@ -5,10 +5,12 @@ from thirdweb_ai.tools.tool import tool
 
 
 class Nebula(Service):
-    def __init__(self, secret_key: str, response_format: dict[str, int | str] | None = None) -> None:
+    def __init__(
+        self, secret_key: str, session_id: str | None = None, response_format: dict[str, int | str] | None = None
+    ) -> None:
         super().__init__(base_url="https://nebula-api.thirdweb.com", secret_key=secret_key)
-        if response_format:
-            self.response_format = response_format
+        self.response_format = response_format or None
+        self.session_id = session_id or None
 
     @tool(
         description="Send a message to Nebula AI and get a response. This can be used for blockchain queries, contract interactions, and access to thirdweb tools."
@@ -19,39 +21,24 @@ class Nebula(Service):
             str,
             "The natural language message to process. Can be a question about blockchain data, a request to execute a transaction, or any web3-related query.",
         ],
-        session_id: Annotated[
-            str | None,
-            "Optional session ID to maintain conversation context. If provided, this message will be part of an ongoing conversation; if omitted, a new session is created.",
-        ] = None,
-        context: Annotated[
-            dict[str, Any] | None,
-            "Contextual information for processing the request, including: chainIds (array of chain identifiers) and walletAddress (user's wallet for transaction signing). Example: {'chainIds': ['1', '137'], 'walletAddress': '0x123...'}",
-        ] = None,
     ) -> dict[str, Any]:
         data: dict[str, Any] = {"message": message, "stream": False}
-        if session_id:
-            data["session_id"] = session_id
-        if context:
-            data["context"] = context
         if self.response_format:
             data["response_format"] = self.response_format
+        if self.session_id:
+            data["context"] = {"session_id": self.session_id}
 
         return self._post("/chat", data)
 
-    @tool(
-        description="Retrieve all available Nebula AI sessions for the authenticated account. Returns an array of session metadata including IDs, titles, and creation timestamps, allowing you to find and reference existing conversations."
-    )
     def list_sessions(self) -> dict[str, Any]:
         return self._get("session/list")
 
-    @tool(
-        description="Fetch complete information about a specific Nebula AI session, including conversation history, context settings, and metadata. Use this to examine past interactions or resume an existing conversation thread."
-    )
     def get_session(
         self,
-        session_id: Annotated[
-            str,
-            "Unique identifier for the target session. This UUID references a specific conversation history in the Nebula system.",
-        ],
+        session_id: str,
     ) -> dict[str, Any]:
         return self._get(f"/session/{session_id}")
+
+    def create_session(self) -> dict[str, Any]:
+        data = {}
+        return self._post("/session", data)
