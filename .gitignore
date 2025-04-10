@@ -16,6 +16,7 @@ yalc.lock
 ./build/
 playwright-report/
 .env/
+_version.pyi
 
 # codecov binary
 codecov
