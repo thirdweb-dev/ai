@@ -1,6 +1,6 @@
 [project]
 name = "thirdweb-ai"
-version = "0.1.10"
+dynamic = ["version", "dependencies"]
 description = "thirdweb AI"
 authors = [{ name = "thirdweb", email = "support@thirdweb.com" }]
 requires-python = ">=3.10,<4.0"
@@ -14,13 +14,6 @@ keywords = [
     "ai",
     "web3",
     "onchain",
-]
-dependencies = [
-    "pydantic>=2.10.6,<3",
-    "jsonref>=1.1.0,<2",
-    "httpx>=0.28.1,<0.29",
-    "aiohttp>=3.11.14",
-    "web3>=7.9.0",
 ]
 
 [project.optional-dependencies]
@@ -66,8 +59,31 @@ include = ["src/thirdweb_ai"]
 "src/thirdweb_ai" = "thirdweb_ai"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "uv-dynamic-versioning"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.hatch.build.hooks.version]
+path = "src/thirdweb_ai/_version.py"
+template = '''
+version = "{version}"
+'''
+
+[tool.hatch.metadata.hooks.uv-dynamic-versioning]
+dependencies = [
+      "thirdweb-mcp=={{ version }}",
+      "pydantic>=2.10.6,<3",
+      "jsonref>=1.1.0,<2",
+      "httpx>=0.28.1,<0.29",
+      "aiohttp>=3.11.14",
+      "web3>=7.9.0",
+]
+
+[tool.uv-dynamic-versioning]
+vcs = "git"
+style = "semver"
 
 [tool.pyright]
 include = ["src"]

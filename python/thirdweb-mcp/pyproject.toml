@@ -1,16 +1,11 @@
 [project]
 name = "thirdweb-mcp"
-version = "0.1.14"
+dynamic = ["version", "dependencies"]
 description = "thirdweb MCP"
 authors = [{ name = "thirdweb", email = "support@thirdweb.com" }]
 requires-python = "~=3.10"
 readme = "README.md"
 license = "Apache-2.0"
-dependencies = [
-    "mcp>=1.3.0,<2",
-    "click>=8.1.8,<9",
-    "thirdweb-ai[mcp]==0.1.10",
-]
 
 [project.scripts]
 thirdweb-mcp = "src.mcp:main"
@@ -28,5 +23,25 @@ include = ["src"]
 include = ["src"]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "uv-dynamic-versioning"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.hatch.build.hooks.version]
+path = "src/_version.py"
+template = '''
+version = "{version}"
+'''
+
+[tool.hatch.metadata.hooks.uv-dynamic-versioning]
+dependencies = [
+    "mcp>=1.3.0,<2",
+    "click>=8.1.8,<9",
+    "thirdweb-ai[mcp]=={{ version }}",
+]
+
+[tool.uv-dynamic-versioning]
+vcs = "git"
+style = "semver"
