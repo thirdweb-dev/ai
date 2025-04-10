@@ -31,9 +31,6 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "uv.lock" # Update cache if uv.lock changes
       
-      - name: Install the project
-        run: uv sync
-
       - name: Build thirdweb-mcp
         run: uv build
 
@@ -70,9 +67,6 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "uv.lock" # Update cache if uv.lock changes
       
-      - name: Install the project
-        run: uv sync
-
       - name: Build thirdweb-mcp
         run: uv build
 
