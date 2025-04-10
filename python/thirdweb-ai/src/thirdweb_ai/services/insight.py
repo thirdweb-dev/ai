@@ -129,7 +129,7 @@ class Insight(Service):
         return out
 
     @tool(
-        description="Retrieve token balances for a specified address. Lists all tokens owned with their balances, metadata, and prices. The default token type is erc20."
+        description="Retrieve token balances for a specified address. Lists all tokens owned with their balances, metadata, and prices. The default token type is erc20. Supports pagination with page and limit parameters."
     )
     def get_address_tokens(
         self,
@@ -145,16 +145,28 @@ class Insight(Service):
             Literal["erc20", "erc721", "erc1155"],
             "Type of token to query. erc20 means normal tokens, erc721 are NFTs, erc1155 are semi-fungible tokens",
         ] = "erc20",
+        page: Annotated[
+            int | None,
+            "Page number for paginated results, starting from 0. Use with limit parameter for browsing token balances.",
+        ] = None,
+        limit: Annotated[
+            int | None,
+            "Maximum number of token records to return per request. Default is 20, adjust for pagination.",
+        ] = None,
     ) -> dict[str, Any]:
         params: dict[str, Any] = {"include_price": True, "include_spam": False}
         chain_ids = chain_id if chain_id is not None else self.chain_ids
         if chain_ids:
             params["chain"] = chain_ids
+        if page is not None:
+            params["page"] = page
+        if limit is not None:
+            params["limit"] = limit
         owner_address = validate_address(owner_address)
         return self._get(f"tokens/{token_type.lower()}/{owner_address}", params)
 
     @tool(
-        description="Get current market prices for native and ERC20 tokens. Useful for valuation, tracking portfolio value, or monitoring price changes."
+        description="Get current market prices for native and ERC20 tokens. Useful for valuation, tracking portfolio value, or monitoring price changes. Supports pagination with page and limit parameters."
     )
     def get_token_prices(
         self,
@@ -166,16 +178,28 @@ class Insight(Service):
             list[int] | int | None,
             "Chain ID(s) where the tokens exist (e.g., 1 for Ethereum, 137 for Polygon). Must match the token network.",
         ] = None,
+        page: Annotated[
+            int | None,
+            "Page number for paginated results, starting from 0. Use with limit parameter for browsing price data.",
+        ] = None,
+        limit: Annotated[
+            int | None,
+            "Maximum number of token price records to return per request. Default is 20, adjust for pagination.",
+        ] = None,
     ) -> dict[str, Any]:
         token_addresses = [validate_address(addr) for addr in token_addresses]
         params: dict[str, Any] = {"address": token_addresses}
         chain_ids = chain_id if chain_id is not None else self.chain_ids
         if chain_ids:
             params["chain"] = chain_ids
+        if page is not None:
+            params["page"] = page
+        if limit is not None:
+            params["limit"] = limit
         return self._get("tokens/price", params)
 
     @tool(
-        description="Get metadata about a smart contract, including name, symbol, decimals, and other contract-specific information. Also returns the contract ABI which details how to interact with the contract. Use this when asked about a contract's functions, interface, or capabilities. This tool specifically retrieves details about deployed smart contracts (NOT regular wallet addresses or transaction hashes)."
+        description="Get metadata about a smart contract, including name, symbol, decimals, and other contract-specific information. Also returns the contract ABI which details how to interact with the contract. Use this when asked about a contract's functions, interface, or capabilities. This tool specifically retrieves details about deployed smart contracts (NOT regular wallet addresses or transaction hashes). Supports pagination with page and limit parameters."
     )
     def get_contract_metadata(
         self,
@@ -187,16 +211,28 @@ class Insight(Service):
             list[int] | int | None,
             "Chain ID(s) where the contract is deployed (e.g., 1 for Ethereum). Specify the correct network.",
         ] = None,
+        page: Annotated[
+            int | None,
+            "Page number for paginated results, starting from 0. Use with limit parameter for browsing contract metadata.",
+        ] = None,
+        limit: Annotated[
+            int | None,
+            "Maximum number of metadata records to return per request. Default is 20, adjust for pagination.",
+        ] = None,
     ) -> dict[str, Any]:
         params = {}
         chain_ids = chain_id if chain_id is not None else self.chain_ids
         if chain_ids:
             params["chain"] = chain_ids
+        if page is not None:
+            params["page"] = page
+        if limit is not None:
+            params["limit"] = limit
         contract_address = validate_address(contract_address)
         return self._get(f"contracts/metadata/{contract_address}", params)
 
     @tool(
-        description="Retrieve detailed information about NFTs from a specific collection, including metadata, attributes, and images. Optionally get data for a specific token ID."
+        description="Retrieve detailed information about NFTs from a specific collection, including metadata, attributes, and images. Optionally get data for a specific token ID. Supports pagination with page and limit parameters."
     )
     def get_nfts_from_contract(
         self,
@@ -212,12 +248,24 @@ class Insight(Service):
             list[int] | int | None,
             "Chain ID(s) where the NFT contract is deployed (e.g., 1 for Ethereum). Specify the correct network.",
         ] = None,
+        page: Annotated[
+            int | None,
+            "Page number for paginated results, starting from 0. Use with limit parameter for browsing NFT collections.",
+        ] = None,
+        limit: Annotated[
+            int | None,
+            "Maximum number of NFTs to return per request. Default is 20, adjust for pagination.",
+        ] = None,
     ) -> dict[str, Any]:
         params = {}
         chain_ids = chain_id if chain_id is not None else self.chain_ids
         if chain_ids:
             params["chain"] = chain_ids
         params["include_metadata"] = True
+        if page is not None:
+            params["page"] = page
+        if limit is not None:
+            params["limit"] = limit
 
         contract_address = validate_address(contract_address)
         if token_id:
@@ -299,7 +347,7 @@ class Insight(Service):
         return self._get(f"nfts/transfers/{contract_address}", params)
 
     @tool(
-        description="Get detailed information about a specific block by its number or hash. Use this when asked about blockchain blocks (e.g., 'What's in block 12345678?' or 'Tell me about this block: 0xabc123...'). This tool is specifically for block data, NOT transactions, addresses, or contracts."
+        description="Get detailed information about a specific block by its number or hash. Use this when asked about blockchain blocks (e.g., 'What's in block 12345678?' or 'Tell me about this block: 0xabc123...'). This tool is specifically for block data, NOT transactions, addresses, or contracts. Supports pagination with page and limit parameters."
     )
     def get_block_details(
         self,
@@ -311,18 +359,30 @@ class Insight(Service):
             list[int] | int | None,
             "Chain ID(s) to query (e.g., 1 for Ethereum). Specify the blockchain network where the block exists.",
         ] = None,
+        page: Annotated[
+            int | None,
+            "Page number for paginated results, starting from 0. Use with limit parameter for browsing block details.",
+        ] = None,
+        limit: Annotated[
+            int | None,
+            "Maximum number of records to return per request. Default is 20, adjust for pagination.",
+        ] = None,
     ) -> dict[str, Any]:
         params = {}
         chain_ids = chain_id if chain_id is not None else self.chain_ids
         if chain_ids:
             params["chain"] = chain_ids
+        if page is not None:
+            params["page"] = page
+        if limit is not None:
+            params["limit"] = limit
 
         block_identifier = validate_block_identifier(block_identifier)
         out = self._get(f"resolve/{block_identifier}", params)
         return clean_resolve(out)
 
     @tool(
-        description="Look up transactions for a wallet or contract address. Use this when asked about a specific Ethereum address (e.g., '0x1234...') to get account details including balance, transaction count, and contract verification status. This tool is specifically for addresses (accounts and contracts), NOT transaction hashes or ENS names."
+        description="Look up transactions for a wallet or contract address. Use this when asked about a specific Ethereum address (e.g., '0x1234...') to get account details including balance, transaction count, and contract verification status. This tool is specifically for addresses (accounts and contracts), NOT transaction hashes or ENS names. Supports pagination with page and limit parameters."
     )
     def get_address_transactions(
         self,
@@ -334,17 +394,29 @@ class Insight(Service):
             list[int] | int | None,
             "Chain ID(s) to query (e.g., 1 for Ethereum). Specify the blockchain network for the address.",
         ] = None,
+        page: Annotated[
+            int | None,
+            "Page number for paginated results, starting from 0. Use with limit parameter for browsing transaction history.",
+        ] = None,
+        limit: Annotated[
+            int | None,
+            "Maximum number of transactions to return per request. Default is 20, adjust for pagination.",
+        ] = None,
     ) -> dict[str, Any]:
         params = {}
         chain_ids = chain_id if chain_id is not None else self.chain_ids
         if chain_ids:
             params["chain"] = chain_ids
+        if page is not None:
+            params["page"] = page
+        if limit is not None:
+            params["limit"] = limit
         validated_address = validate_address(address)
         out = self._get(f"resolve/{validated_address}", params)
         return clean_resolve(out)
 
     @tool(
-        description="Look up transactions associated with an ENS domain name (anything ending in .eth like 'vitalik.eth'). This tool is specifically for ENS domains, NOT addresses, transaction hashes, or contract queries."
+        description="Look up transactions associated with an ENS domain name (anything ending in .eth like 'vitalik.eth'). This tool is specifically for ENS domains, NOT addresses, transaction hashes, or contract queries. Supports pagination with page and limit parameters."
     )
     def get_ens_transactions(
         self,
@@ -356,16 +428,28 @@ class Insight(Service):
             list[int] | int | None,
             "Chain ID(s) to query (e.g., 1 for Ethereum). ENS is primarily on Ethereum mainnet.",
         ] = None,
+        page: Annotated[
+            int | None,
+            "Page number for paginated results, starting from 0. Use with limit parameter for browsing transaction history.",
+        ] = None,
+        limit: Annotated[
+            int | None,
+            "Maximum number of transactions to return per request. Default is 20, adjust for pagination.",
+        ] = None,
     ) -> dict[str, Any]:
         params = {}
         chain_ids = chain_id if chain_id is not None else self.chain_ids
         if chain_ids:
             params["chain"] = chain_ids
+        if page is not None:
+            params["page"] = page
+        if limit is not None:
+            params["limit"] = limit
         out = self._get(f"resolve/{ens_name}", params)
         return clean_resolve(out)
 
     @tool(
-        description="Get detailed information about a specific transaction by its hash. Use this when asked to analyze, look up, check, or get details about a transaction hash (e.g., 'What can you tell me about this transaction: 0x5407ea41...'). This tool specifically deals with transaction hashes (txid/txhash), NOT addresses, contracts, or ENS names."
+        description="Get detailed information about a specific transaction by its hash. Use this when asked to analyze, look up, check, or get details about a transaction hash (e.g., 'What can you tell me about this transaction: 0x5407ea41...'). This tool specifically deals with transaction hashes (txid/txhash), NOT addresses, contracts, or ENS names. Supports pagination with page and limit parameters."
     )
     def get_transaction_details(
         self,
@@ -377,18 +461,30 @@ class Insight(Service):
             list[int] | int | None,
             "Chain ID(s) to query (e.g., 1 for Ethereum). Specify the blockchain network where the transaction exists.",
         ] = None,
+        page: Annotated[
+            int | None,
+            "Page number for paginated results, starting from 0. Use with limit parameter for browsing transaction details.",
+        ] = None,
+        limit: Annotated[
+            int | None,
+            "Maximum number of transaction details to return per request. Default is 20, adjust for pagination.",
+        ] = None,
     ) -> dict[str, Any]:
         params = {}
         chain_ids = chain_id if chain_id is not None else self.chain_ids
         if chain_ids:
             params["chain"] = chain_ids
+        if page is not None:
+            params["page"] = page
+        if limit is not None:
+            params["limit"] = limit
 
         transaction_hash = validate_transaction_hash(transaction_hash)
         out = self._get(f"resolve/{transaction_hash}", params)
         return clean_resolve(out)
 
     @tool(
-        description="Decode a function or event signature. Use this when you need to understand what a specific function selector or event signature does and what parameters it accepts."
+        description="Decode a function or event signature. Use this when you need to understand what a specific function selector or event signature does and what parameters it accepts. Supports pagination with page and limit parameters."
     )
     def decode_signature(
         self,
@@ -400,12 +496,60 @@ class Insight(Service):
             list[int] | int | None,
             "Chain ID(s) to query (e.g., 1 for Ethereum). Specify to improve signature lookup accuracy.",
         ] = None,
+        page: Annotated[
+            int | None,
+            "Page number for paginated results, starting from 0. Use with limit parameter for browsing signature matches.",
+        ] = None,
+        limit: Annotated[
+            int | None,
+            "Maximum number of signature matches to return per request. Default is 20, adjust for pagination.",
+        ] = None,
     ) -> dict[str, Any]:
         params = {}
         chain_ids = chain_id if chain_id is not None else self.chain_ids
         if chain_ids:
             params["chain"] = chain_ids
+        if page is not None:
+            params["page"] = page
+        if limit is not None:
+            params["limit"] = limit
 
         signature = validate_signature(signature)
         out = self._get(f"resolve/{signature}", params)
         return clean_resolve(out)
+
+    @tool(
+        description="Get all transactions for a specific wallet address. Use this to analyze transaction history, monitor wallet activity, or track specific wallet interactions. Supports pagination with page and limit parameters."
+    )
+    def get_wallet_transactions(
+        self,
+        wallet_address: Annotated[
+            str,
+            "The wallet address to get transactions for (e.g., '0x1234...'). Must be a valid blockchain address.",
+        ],
+        chain_id: Annotated[
+            list[int] | int | None,
+            "Chain ID(s) to query (e.g., 1 for Ethereum, 137 for Polygon). Specify multiple IDs as a list for cross-chain queries.",
+        ] = None,
+        page: Annotated[
+            int | None,
+            "Page number for paginated results, starting from 0. 20 results are returned per page.",
+        ] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {
+            "sort_by": "block_number",
+            "decode": True,
+            "limit": 20,
+            "sort_order": "desc",
+        }
+
+        chain_ids = chain_id if chain_id is not None else self.chain_ids
+        if chain_ids:
+            params["chain"] = chain_ids
+        if page is not None:
+            params["page"] = page
+
+        wallet_address = validate_address(wallet_address)
+        out = self._get(f"wallets/{wallet_address}/transactions", params)
+        out["data"] = filter_response_keys(out["data"], TRANSACTION_KEYS_TO_KEEP)
+        return out
