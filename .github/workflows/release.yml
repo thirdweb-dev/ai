@@ -4,6 +4,10 @@ on:
   release:
     types: [published]
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
@@ -36,4 +40,6 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-          packages-dir: python/thirdweb-mcp/dist/ python/thirdweb-ai/dist/
+          packages-dir: python/thirdweb-mcp/dist python/thirdweb-ai/dist
+          verbose: true
+          skip-existing: true
