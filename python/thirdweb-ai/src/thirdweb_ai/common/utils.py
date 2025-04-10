@@ -61,10 +61,9 @@ def clean_resolve(out: dict[str, Any]):
                     transaction.pop(key, None)
     if "events" in out["data"]:
         for event in out["data"]["events"]:
-            if "data" in event and is_encoded(event["data"]):
-                event.pop("data")
-            if "logs_bloom" in event:
-                event.pop("logs_bloom")
+            for key in list(event.keys()):
+                if key not in EVENT_KEYS_TO_KEEP:
+                    event.pop(key, None)
     return out
 
 
