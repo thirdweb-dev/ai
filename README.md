@@ -82,13 +82,18 @@ engine = Engine(...)
 storage = Storage(secret_key=...)
 
 # Example: Create tools for AI agents
+# Option 1: Use Nebula alone (recommended when you need a self-sufficient blockchain agent)
+# Nebula already uses most other services internally
 tools = [
-    *insight.get_tools(),
     *nebula.get_tools(),
-    *engine.get_tools(),
-    *storage.get_tools(),
-    # Or pick an individual tool from the services
 ]
+
+# Option 2: Use individual services directly without Nebula
+# tools = [
+#     *insight.get_tools(),
+#     *engine.get_tools(),
+#     *storage.get_tools(),
+# ]
 
 # Example: Framework integration (LangChain)
 from thirdweb_ai.adapters.langchain import get_langchain_tools
@@ -120,6 +125,19 @@ For comprehensive documentation, please visit:
 We take security seriously. If you discover a security vulnerability within thirdweb AI, please email security@thirdweb.com rather than using the issue tracker.
 
 For non-security-related bugs, please use the GitHub issue tracker.
+
+## ⚠️ Important Usage Notes
+
+When using Nebula, do not combine it with other tools (Insight, Engine, Storage) in the same agent implementation as Nebula already calls these tools in the background. Using them together can lead to compatibility issues and unexpected behavior.
+
+## 📦 Publishing Workflow
+
+To publish a new version of thirdweb AI packages:
+
+1. Create a git tag for the new version: `git tag -a v0.X.Y -m "Release v0.X.Y"`
+2. Push the tag to GitHub: `git push origin v0.X.Y`
+3. Go to GitHub and create a release using this tag
+4. The CI/CD pipeline will automatically build and publish both packages to PyPI with matching version numbers
 
 ## 📧 Contact
 
