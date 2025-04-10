@@ -32,9 +32,8 @@ jobs:
           uv build
       
       - name: Publish to PyPI
-        if: github.event_name == 'release' && github.event.action == 'published'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-          packages-dir: thirdweb-mcp/dist/ thirdweb-ai/dist/
+          packages-dir: python/thirdweb-mcp/dist/ python/thirdweb-ai/dist/
