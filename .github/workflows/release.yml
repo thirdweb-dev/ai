@@ -4,13 +4,19 @@ on:
   release:
     types: [published]
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
-  build-and-publish:
+  build-and-publish-ai:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./python/thirdweb-ai
+    environment:
+      name: pypi
+      url: https://pypi.org/p/thirdweb-ai
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -25,30 +31,54 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "uv.lock" # Update cache if uv.lock changes
       
-      - name: Build thirdweb-mcp
-        run: |
-          cd python/thirdweb-mcp
-          uv build
-      
-      - name: Build thirdweb-ai
-        run: |
-          cd python/thirdweb-ai
-          uv build
-      
-      - name: Publish AI to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
-          packages-dir: python/thirdweb-ai/dist
-          verbose: true
-          skip-existing: true
+      - name: Install the project
+        run: uv sync
 
-      - name: Publish MCP to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Build thirdweb-mcp
+        run: uv build
+
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
         with:
           user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
-          packages-dir: python/thirdweb-mcp/dist
-          verbose: true
-          skip-existing: true
+          password: ${{ secrets.PYPI_API_KEY }}
+          packages-dir: python/thirdweb-ai/dist/
+
+  build-and-publish-mcp:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./python/thirdweb-mcp
+    environment:
+      name: pypi
+      url: https://pypi.org/p/thirdweb-mcp
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@22695119d769bdb6f7032ad67b9bca0ef8c4a174 # v5
+
+      - name: Install Python
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock" # Update cache if uv.lock changes
+      
+      - name: Install the project
+        run: uv sync
+
+      - name: Build thirdweb-mcp
+        run: uv build
+
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_KEY }}
+          packages-dir: python/thirdweb-mcp/dist/
