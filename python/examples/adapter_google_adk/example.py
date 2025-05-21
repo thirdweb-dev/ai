@@ -1,53 +1,71 @@
 import asyncio
 import os
 
-from google.adk.agents import Agent
-from thirdweb_ai import Insight, Nebula
-from thirdweb_ai.adapters.autogen import get_autogen_tools
+from google.adk.agents import LlmAgent
+from google.adk.models.lite_llm import LiteLlm
+from google.adk.runners import Runner
+from google.adk.sessions import InMemorySessionService
+from google.genai import types
 
-# Initialize Thirdweb Insight and Nebula with API key
-insight = Insight(secret_key=os.getenv("THIRDWEB_SECRET_KEY"), chain_id=1)
-nebula = Nebula(secret_key=os.getenv("THIRDWEB_SECRET_KEY"))
+from thirdweb_ai import Insight
+from thirdweb_ai.adapters.google_adk.google_adk import get_google_adk_tools
+
+# Example app configuration
+APP_NAME = "thirdweb_insight_app"
+USER_ID = "test_user"
+SESSION_ID = "test_session"
 
 
-async def main():
-    """Example of using thirdweb_ai with AutoGen."""
+async def setup_agent() -> Runner:
+    """Set up an agent with Thirdweb Insight tools.
 
-    # Create thirdweb tools for AutoGen
-    tools = get_autogen_tools(insight.get_tools() + nebula.get_tools())
+    Returns:
+        Runner: Google ADK runner for the agent
+    """
+    # Initialize Insight with secret key
+    secret_key = os.getenv("THIRDWEB_SECRET_KEY")
+    if not secret_key:
+        raise ValueError("THIRDWEB_SECRET_KEY environment variable is required")
 
-    # Create a cancellation token for the agent
-    cancellation_token = CancellationToken()
+    # Get Insight tools
+    insight = Insight(secret_key=secret_key, chain_id=1)
+    insight_tools = insight.get_tools()
 
-    # Initialize the OpenAI model client
-    model = OpenAIChatCompletionClient(model="gpt-4o-mini")
+    # Convert to Google ADK tools
+    adk_tools = get_google_adk_tools(insight_tools)
 
-    # Create an assistant agent with thirdweb tools
-    agent = AssistantAgent(
-        "Assistant",
-        model_client=model,
-        tools=tools,
+    # Print all available tools for debugging
+    print(f"Available tools ({len(adk_tools)}):")
+    for tool_count, tool in enumerate(adk_tools, start=1):
+        print(f"- Tool #{tool_count} {tool.name}")
+
+    agent = LlmAgent(
+        model=LiteLlm(model="gpt-4o-mini"), 
+        name="thirdweb_insight_agent", 
+        tools=adk_tools
     )
 
-    # Example queries to demonstrate capabilities
-    queries = [
-        "What's the current balance of thirdweb.eth?",
-        "When is the most recent transaction hash and timestamp of thirdweb.eth?",
-    ]
+    # Set up session
+    session_service = InMemorySessionService()
+    # We need to create the session but don't need to store it
+    await session_service.create_session(app_name=APP_NAME, user_id=USER_ID, session_id=SESSION_ID)
 
-    # Run the queries
-    for query in queries:
-        print(f"\n\nQuery: {query}")
-        print("-" * 50)
+    # Return runner
+    return Runner(agent=agent, app_name=APP_NAME, session_service=session_service)
 
-        result = await agent.run(
-            task=query,
-            cancellation_token=cancellation_token,
-        )
 
-        print("\nResult:")
-        print(result)
+async def call_agent(query):
+    runner = await setup_agent()
+    content = types.Content(role='user', parts=[types.Part(text=query)])
+    events = runner.run(user_id=USER_ID, session_id=SESSION_ID, new_message=content)
+
+    for event in events:
+        if event.is_final_response():
+            final_response = event.content.parts[0].text
+            print("Agent Response: ", final_response)
+
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    test_query = "Get details of 0x0cd2de80bb87b327a0e32576ddddc8af6c73d163dca2d00e8777117918e3d056 transaction"
+    asyncio.run(call_agent(test_query))
