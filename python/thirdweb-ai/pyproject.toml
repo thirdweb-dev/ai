@@ -87,7 +87,6 @@ dependencies = [
 vcs = "git"
 style = "semver"
 format = "{base}"
-dev_mode = "env:THIRDWEB_DEV_MODE"
 
 [tool.pyright]
 include = ["src"]
