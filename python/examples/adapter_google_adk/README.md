@@ -12,10 +12,10 @@ First, ensure you have Python 3.10+ installed. Then install the required package
 
 ```bash
 # Using pip
-pip install "thirdweb-ai[autogen]"
+pip install "thirdweb-ai[google-adk]"
 
 # Using uv
-uv add "thirdweb-ai[autogen]"
+uv add "thirdweb-ai[google-adk]"
 ```
 
 ## Usage

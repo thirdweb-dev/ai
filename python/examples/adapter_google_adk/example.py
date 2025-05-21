@@ -39,10 +39,12 @@ async def setup_agent() -> Runner:
     for tool_count, tool in enumerate(adk_tools, start=1):
         print(f"- Tool #{tool_count} {tool.name}")
 
+    # Create the agent with the tools
     agent = LlmAgent(
-        model=LiteLlm(model="gpt-4o-mini"), 
-        name="thirdweb_insight_agent", 
-        tools=adk_tools
+        model=LiteLlm(model="gpt-4o-mini"),
+        name="thirdweb_insight_agent",
+        # Convert BaseTool to the expected type for LlmAgent
+        tools=adk_tools,  # type: ignore
     )
 
     # Set up session
@@ -54,18 +56,26 @@ async def setup_agent() -> Runner:
     return Runner(agent=agent, app_name=APP_NAME, session_service=session_service)
 
 
-async def call_agent(query):
+async def call_agent(query: str) -> None:
+    """Run a query through the agent.
+
+    Args:
+        query: The query to send to the agent
+    """
     runner = await setup_agent()
-    content = types.Content(role='user', parts=[types.Part(text=query)])
+    content = types.Content(role="user", parts=[types.Part(text=query)])
     events = runner.run(user_id=USER_ID, session_id=SESSION_ID, new_message=content)
 
     for event in events:
-        if event.is_final_response():
+        if (
+            hasattr(event, "is_final_response")
+            and event.is_final_response()
+            and (event.content and hasattr(event.content, "parts") and event.content.parts)
+        ):
             final_response = event.content.parts[0].text
             print("Agent Response: ", final_response)
 
 
-
 if __name__ == "__main__":
-    test_query = "Get details of 0x0cd2de80bb87b327a0e32576ddddc8af6c73d163dca2d00e8777117918e3d056 transaction"
+    test_query = "Find information on transaction: 0x45027cce9d2b990349b4a1e015ec29ca7c7ef15d82487d898f24866a09e8b84c."
     asyncio.run(call_agent(test_query))
