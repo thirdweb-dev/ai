@@ -47,3 +47,33 @@ vcs = "git"
 style = "semver"
 format = "{base}"
 dev_mode = "env:THIRDWEB_DEV_MODE"
+
+[tool.pyright]
+include = ["src"]
+typeCheckingMode = "strict"
+reportUnknownVariableType = "none"
+reportUnknownLambdaType = "none"
+reportUnknownArgumentType = "none"
+reportMissingTypeStubs = "none"
+reportAbstractUsage = "none"
+reportUnknownMemberType = "none"
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.ruff.lint]
+extend-select = [
+  "E", "F", "W", "I", "N", "UP", "A", "B", "ASYNC", "C4", "COM", "SIM", 
+  "RET", "YTT", "PTH", "INT", "TID", "SLOT", "SLF", "RSE", "Q", "PT", "PYI", "T20", 
+  "PIE", "LOG", "ICN", "ISC", "FA", "T10", "DTZ", "EXE", "RUF", "C", "FURB", "PERF",
+  "FLY", "PLC", "PLE", "PLW", "PGH", 
+]
+ignore = [
+  "SIM103", "E501", "UP017", "ISC001", "COM812", "PLC0105", "C901"
+]

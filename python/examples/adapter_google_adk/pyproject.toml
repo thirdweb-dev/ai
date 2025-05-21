@@ -5,7 +5,7 @@ description = "Example of using thirdweb_ai with Google ADK"
 authors = [{ name = "thirdweb", email = "support@thirdweb.com" }]
 requires-python = "~=3.10"
 dependencies = [
-    "thirdweb-ai[google-adk]"
+    "thirdweb-ai[google-adk]>=0.1.17"
 ]
 
 [tool.uv]

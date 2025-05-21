@@ -5,7 +5,6 @@ from google.genai import types
 
 from thirdweb_ai.tools.tool import Tool, ToolSchema
 
-from pydantic import BaseModel
 
 class GoogleAdkTool(BaseTool):
     """Adapter for Thirdweb Tool to Google ADK BaseTool.
@@ -40,8 +39,9 @@ class GoogleAdkTool(BaseTool):
         Returns:
             A FunctionDeclaration for Google ADK
         """
-        parameters = self.tool.schema["parameters"]
-        del parameters["additionalProperties"]
+        parameters = self.tool.schema.get("parameters", {})
+        if "additionalProperties" in parameters:
+            del parameters["additionalProperties"]
         return types.FunctionDeclaration(
             name=self.name,
             description=self.description,

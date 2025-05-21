@@ -12,7 +12,7 @@ def get_pydantic_ai_tools(tools: list[Tool]) -> list[PydanticTool]:
             return tool.run_json(kwargs)
 
         async def prepare(ctx: RunContext, tool_def: ToolDefinition) -> ToolDefinition:
-            tool_def.parameters_json_schema = tool.schema["parameters"]
+            tool_def.parameters_json_schema = tool.schema.get("parameters", {})
             return tool_def
 
         return PydanticTool(

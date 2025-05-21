@@ -1,0 +1,46 @@
+repos:
+  - repo: local
+    hooks:
+      # thirdweb-ai linting
+      - id: ruff-check-ai
+        name: ruff check (thirdweb-ai)
+        entry: bash -c 'cd python/thirdweb-ai && uv run ruff check --fix .'
+        language: system
+        pass_filenames: false
+        files: ^python/thirdweb-ai/
+      - id: ruff-format-ai
+        name: ruff format (thirdweb-ai)
+        entry: bash -c 'cd python/thirdweb-ai && uv run ruff format .'
+        language: system
+        pass_filenames: false
+        files: ^python/thirdweb-ai/
+        
+      # thirdweb-mcp linting
+      - id: ruff-check-mcp
+        name: ruff check (thirdweb-mcp)
+        entry: bash -c 'cd python/thirdweb-mcp && uv run ruff check --fix .'
+        language: system
+        pass_filenames: false
+        files: ^python/thirdweb-mcp/
+      - id: ruff-format-mcp
+        name: ruff format (thirdweb-mcp)
+        entry: bash -c 'cd python/thirdweb-mcp && uv run ruff format .'
+        language: system
+        pass_filenames: false
+        files: ^python/thirdweb-mcp/
+        
+      # thirdweb-ai type checking
+      - id: pyright-ai
+        name: pyright (thirdweb-ai)
+        entry: bash -c 'cd python/thirdweb-ai && uv run pyright'
+        language: system
+        pass_filenames: false
+        files: ^python/thirdweb-ai/
+        
+      # thirdweb-mcp type checking
+      - id: pyright-mcp
+        name: pyright (thirdweb-mcp)
+        entry: bash -c 'cd python/thirdweb-mcp && uv run pyright'
+        language: system
+        pass_filenames: false
+        files: ^python/thirdweb-mcp/

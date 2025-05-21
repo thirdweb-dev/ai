@@ -367,7 +367,7 @@ class Insight(Service):
     @tool(
         description="Get detailed information about a specific transaction by its hash. Use this when asked to analyze, look up, check, or get details about a transaction hash (e.g., 'What can you tell me about this transaction: 0x5407ea41...'). This tool specifically deals with transaction hashes (txid/txhash), NOT addresses, contracts, or ENS names."
     )
-    def get_transaction_details(
+    def get_transaction_by_hash(
         self,
         transaction_hash: Annotated[
             str,

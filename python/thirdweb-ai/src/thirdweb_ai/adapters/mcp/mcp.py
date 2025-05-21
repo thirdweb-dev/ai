@@ -11,8 +11,14 @@ def get_fastmcp_tools(tools: list[Tool]) -> list[FastMCPTool]:
             fn=lambda _t=tool, **kwargs: _t.run_json(kwargs),
             name=tool.name,
             description=tool.description,
-            parameters=tool.schema.get("parameters"),
-            fn_metadata=func_metadata(tool._func_definition, skip_names=["self"]),  # noqa: SLF001
+            parameters=tool.schema.get("parameters", {}),
+            fn_metadata=func_metadata(
+                tool._func_definition if hasattr(tool, "_func_definition") else lambda: None,  # noqa: SLF001
+                skip_names=["self"],
+                annotations={},  # Add missing annotations parameter
+            )
+            if hasattr(tool, "_func_definition")
+            else None,
             is_async=False,
             context_kwarg=None,
         )
@@ -30,7 +36,7 @@ def get_mcp_tools(tools: list[Tool]) -> list[types.Tool]:
         types.Tool(
             name=tool.name,
             description=tool.description,
-            inputSchema=tool.schema.get("parameters"),
+            inputSchema=tool.schema.get("parameters", {}),
         )
         for tool in tools
     ]

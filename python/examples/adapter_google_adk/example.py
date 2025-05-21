@@ -43,8 +43,7 @@ async def setup_agent() -> Runner:
     agent = LlmAgent(
         model=LiteLlm(model="gpt-4o-mini"),
         name="thirdweb_insight_agent",
-        # Convert BaseTool to the expected type for LlmAgent
-        tools=adk_tools,  # type: ignore
+        tools=adk_tools,
     )
 
     # Set up session
@@ -68,9 +67,7 @@ async def call_agent(query: str) -> None:
 
     for event in events:
         if (
-            hasattr(event, "is_final_response")
-            and event.is_final_response()
-            and (event.content and hasattr(event.content, "parts") and event.content.parts)
+            event.is_final_response()
         ):
             final_response = event.content.parts[0].text
             print("Agent Response: ", final_response)

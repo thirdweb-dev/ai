@@ -10,7 +10,7 @@ from mcp.server.fastmcp import FastMCP
 @click.command()
 @click.option(
     "--transport",
-    type=click.Choice(["stdio", "sse"]),
+    type=click.Choice(["stdio", "sse", "streamable-http"]),
     default="stdio",
     help="Communication protocol for the MCP server. Use 'stdio' for standard input/output (default, suitable for CLI integrations) or 'sse' for Server-Sent Events (web-based applications).",
 )
@@ -76,9 +76,7 @@ def main(
         services.append("engine")
 
     if not services:
-        raise ValueError(
-            "Please provide a thirdweb secret key through the THIRDWEB_SECRET_KEY environment variable."
-        )
+        raise ValueError("Please provide a thirdweb secret key through the THIRDWEB_SECRET_KEY environment variable.")
 
     # enable the tools for each service
     if "nebula" in services:
