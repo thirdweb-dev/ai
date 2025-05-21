@@ -49,12 +49,13 @@ pip install "thirdweb-ai[pydantic-ai]"  # For Pydantic AI
 thirdweb-ai provides a set of tools that can be integrated with various AI agent frameworks. Here's a basic example:
 
 ```python
-from thirdweb_ai import Engine, Insight, Nebula, Storage, Tool
+from thirdweb_ai import Engine, EngineCloud, Insight, Nebula, Storage, Tool
 
 # Initialize thirdweb services
 insight = Insight(secret_key=...)
 nebula = Nebula(secret_key=...)
 engine = Engine(secret_key=...)
+engine_cloud = EngineCloud(secret_key=..., vault_access_token=...)  # vault_access_token required for server wallet operations
 storage = Storage(secret_key=...)
 
 # Get available tools
@@ -64,10 +65,21 @@ tools = [
     *insight.get_tools(),
     *nebula.get_tools(),
     *engine.get_tools(),
+    *engine_cloud.get_tools(),  # Use EngineCloud for cloud-based engine operations
     *storage.get_tools(),
     # Or pick an individual tool from the services
 ]
 ```
+
+### Available Services
+
+thirdweb-ai provides several core services:
+
+- **Engine**: Deploy contracts, manage wallets, execute transactions, and interact with smart contracts
+- **EngineCloud**: Cloud-based engine operations for creating server wallets (with KMS integration), executing contract calls, and querying transaction history
+- **Insight**: Query blockchain data, retrieve transactions, events, token balances, and contract metadata
+- **Nebula**: Advanced onchain analytics and data processing
+- **Storage**: Store and retrieve data using IPFS and other decentralized storage solutions
 
 ## Framework Integration
 

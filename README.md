@@ -4,7 +4,7 @@ _AI Agents with Onchain Intelligence_
 
 ## 📖 Overview
 
-thirdweb AI is thirdweb's comprehensive toolkit for blockchain data analysis, wallet management, and AI agent interaction with blockchains. It simplifies complex blockchain operations into four core components: Insight for data analysis, Engine for wallet and contract operations, Storage for decentralized file management, and Nebula for natural language-powered blockchain interactions.
+thirdweb AI is thirdweb's comprehensive toolkit for blockchain data analysis, wallet management, and AI agent interaction with blockchains. It simplifies complex blockchain operations into five core components: Insight for data analysis, Engine for wallet and contract operations, EngineCloud for cloud-based engine operations, Storage for decentralized file management, and Nebula for natural language-powered blockchain interactions.
 
 ## 🌐 Features
 
@@ -22,6 +22,13 @@ Core blockchain interaction capabilities:
 - **Wallet**: Secure wallet management and transaction signing
 - **Read**: Read operations for smart contracts and blockchain data
 - **Write**: Transaction creation and contract interaction
+
+### EngineCloud
+Cloud-based engine operations with advanced capabilities:
+- **Server Wallets**: Create and manage server wallets with KMS integration
+- **Contract Interaction**: Read from and write to smart contracts
+- **Transaction Management**: Send transactions and query transaction history
+- **Balance Queries**: Check native token balances on various chains
 
 ### Storage
 Decentralized storage capabilities:
@@ -73,12 +80,13 @@ See the list of [supported framework and installation guides](python/thirdweb-ai
 #### Basic Usage
 
 ```python
-from thirdweb_ai import Engine, Insight, Nebula, Storage, Tool
+from thirdweb_ai import Engine, EngineCloud, Insight, Nebula, Storage, Tool
 
 # Initialize services
 insight = Insight(secret_key=...)
 nebula = Nebula(secret_key=...)
 engine = Engine(...)
+engine_cloud = EngineCloud(secret_key=..., vault_access_token=...)  # For cloud-based operations
 storage = Storage(secret_key=...)
 
 # Example: Create tools for AI agents
@@ -92,6 +100,7 @@ tools = [
 # tools = [
 #     *insight.get_tools(),
 #     *engine.get_tools(),
+#     *engine_cloud.get_tools(),
 #     *storage.get_tools(),
 # ]
 
@@ -128,7 +137,7 @@ For non-security-related bugs, please use the GitHub issue tracker.
 
 ## ⚠️ Important Usage Notes
 
-When using Nebula, do not combine it with other tools (Insight, Engine, Storage) in the same agent implementation as Nebula already calls these tools in the background. Using them together can lead to compatibility issues and unexpected behavior.
+When using Nebula, do not combine it with other tools (Insight, Engine, EngineCloud, Storage) in the same agent implementation as Nebula already calls these tools in the background. Using them together can lead to compatibility issues and unexpected behavior.
 
 ## 📦 Publishing Workflow
 
