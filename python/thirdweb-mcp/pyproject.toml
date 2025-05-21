@@ -45,3 +45,5 @@ dependencies = [
 [tool.uv-dynamic-versioning]
 vcs = "git"
 style = "semver"
+format = "{base}"
+dev_mode = "env:THIRDWEB_DEV_MODE"

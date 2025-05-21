@@ -1,0 +1,16 @@
+[project]
+name = "thirdweb-ai-examples-autogen"
+version = "0.1.0"
+description = "Example of using thirdweb_ai with Google ADK"
+authors = [{ name = "thirdweb", email = "support@thirdweb.com" }]
+requires-python = "~=3.10"
+dependencies = [
+    "thirdweb-ai[google-adk]"
+]
+
+[tool.uv]
+package = false
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
