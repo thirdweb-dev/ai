@@ -68,7 +68,6 @@ def main(
     engine_url: str,
     engine_auth_jwt: str,
     engine_backend_wallet_address: str | None,
-    engine_cloud_url: str,
     vault_access_token: str | None,
 ):
     mcp = FastMCP("thirdweb MCP", port=port)
@@ -123,4 +122,3 @@ def main(
 
 if __name__ == "__main__":
     main()
-

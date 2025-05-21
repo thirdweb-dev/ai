@@ -80,7 +80,6 @@ You can also configure the MCP server using environment variables:
 - `THIRDWEB_ENGINE_URL`: URL endpoint for thirdweb Engine service
 - `THIRDWEB_ENGINE_AUTH_JWT`: Authentication JWT token for Engine
 - `THIRDWEB_ENGINE_BACKEND_WALLET_ADDRESS`: Wallet address for Engine backend
-- `THIRDWEB_ENGINE_CLOUD_URL`: URL endpoint for EngineCloud service (defaults to https://engine.thirdweb.com/v1)
 - `THIRDWEB_VAULT_ACCESS_TOKEN`: Vault access token for EngineCloud server wallet operations
 
 ### Integration with Claude Desktop
