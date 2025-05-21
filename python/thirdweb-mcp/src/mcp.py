@@ -55,12 +55,6 @@ from mcp.server.fastmcp import FastMCP
     help="Wallet address used by the Engine backend for transactions. Optional for the 'engine' service. Falls back to THIRDWEB_ENGINE_BACKEND_WALLET_ADDRESS environment variable if not specified.",
 )
 @click.option(
-    "--engine-cloud-url",
-    type=str,
-    default=lambda: os.getenv("THIRDWEB_ENGINE_CLOUD_URL") or "https://engine.thirdweb.com/v1",
-    help="URL endpoint for thirdweb EngineCloud service. Falls back to THIRDWEB_ENGINE_CLOUD_URL environment variable if not specified.",
-)
-@click.option(
     "--vault-access-token",
     type=str,
     default=lambda: os.getenv("THIRDWEB_VAULT_ACCESS_TOKEN"),
@@ -116,10 +110,9 @@ def main(
             secret_key=secret_key or "",
         )
         add_fastmcp_tools(mcp, engine.get_tools())
-        
+
     if "engine_cloud" in services:
         engine_cloud = EngineCloud(
-            engine_cloud_url=engine_cloud_url,
             secret_key=secret_key,
             vault_access_token=vault_access_token,
         )
@@ -130,3 +123,4 @@ def main(
 
 if __name__ == "__main__":
     main()
+
