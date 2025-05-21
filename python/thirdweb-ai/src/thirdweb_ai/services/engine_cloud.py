@@ -1,14 +1,30 @@
-from typing import Annotated, Any, Literal
+# At the top of the file, add:
+from typing import Annotated, Any, Literal, TypedDict
 
 from thirdweb_ai.services.service import Service
 from thirdweb_ai.tools.tool import tool
+
+
+class FilterField(TypedDict):
+    field: Literal["id", "batchIndex", "from", "signerAddress", "smartAccountAddress", "chainId"]
+
+
+class FilterValues(TypedDict):
+    values: list[int]
+
+
+class FilterOperator(TypedDict):
+    operator: Literal["AND", "OR"]
+
+
+FilterCondition = FilterField | FilterValues | FilterOperator
 
 
 class EngineCloud(Service):
     def __init__(
         self,
         secret_key: str,
-        vault_access_token: str | None = None,
+        vault_access_token: str,
     ):
         super().__init__(base_url="https://engine.thirdweb.com/v1", secret_key=secret_key)
         self.vault_access_token = vault_access_token
@@ -170,17 +186,7 @@ class EngineCloud(Service):
     )
     def search_transactions(
         self,
-        filters: Annotated[
-            list[
-                dict[
-                    Literal["field"],
-                    Literal["id", "batchIndex", "from", "signerAddress", "smartAccountAddress", "chainId"],
-                ]
-                | dict[Literal["values"], list[int]]
-                | dict[Literal["operator"], Literal["AND", "OR"]]
-            ],
-            "List of filter conditions to apply",
-        ],
+        filters: Annotated[FilterField, "List of filter conditions to apply"],
         filters_operation: Annotated[
             Literal["AND", "OR"],
             "Logical operation to apply between filters. 'AND' means all conditions must match, 'OR' means any condition can match.",

@@ -40,8 +40,29 @@ class GoogleAdkTool(BaseTool):
         Returns:
             A FunctionDeclaration for Google ADK
         """
-        parameters = self.tool.schema["parameters"]
-        del parameters["additionalProperties"]
+        # Deep copy the parameters to avoid modifying the original
+        import copy
+        parameters = copy.deepcopy(self.tool.schema["parameters"])
+        
+        if "additionalProperties" in parameters:
+            del parameters["additionalProperties"]
+        
+        def remove_additional_properties(obj: dict[str, Any]):
+            if "additionalProperties" in obj:
+                del obj["additionalProperties"]
+                
+            if "items" in obj and isinstance(obj["items"], dict):
+                remove_additional_properties(obj["items"])
+            
+            if "properties" in obj and isinstance(obj["properties"], dict):
+                for prop in obj["properties"].values():
+                    if isinstance(prop, dict):
+                        remove_additional_properties(prop)
+        
+        if "properties" in parameters:
+            for prop in parameters["properties"].values():
+                remove_additional_properties(prop)
+        
         return types.FunctionDeclaration(
             name=self.name,
             description=self.description,

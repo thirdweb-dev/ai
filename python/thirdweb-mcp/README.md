@@ -9,6 +9,7 @@ thirdweb MCP provides a unified interface to access thirdweb's suite of blockcha
 - **Nebula**: Autonomous onchain execution - real-time on-chain analysis, code generation and contract interactions
 - **Insight**: Blockchain data analysis capabilities for real-time on-chain data
 - **Engine**: Integration with thirdweb's backend infrastructure for contract deployments and interactions
+- **EngineCloud**: Cloud-based engine operations for server wallets, contract interactions, and transaction management
 - **Storage**: Decentralized storage capabilities for uploading and retrieving data via IPFS
 
 ## Installation
@@ -45,9 +46,10 @@ uv sync
 
 The thirdweb MCP server requires configuration based on which services you want to enable:
 
-1. **thirdweb Secret Key**: Required for Nebula, Insight, and Storage services. Obtain from the [thirdweb dashboard](https://thirdweb.com/dashboard).
+1. **thirdweb Secret Key**: Required for Nebula, Insight, Storage, and EngineCloud services. Obtain from the [thirdweb dashboard](https://thirdweb.com/dashboard).
 2. **Chain IDs**: Blockchain network IDs to connect to (e.g., 1 for Ethereum mainnet, 137 for Polygon).
 3. **Engine Configuration**: If using the Engine service, you'll need the Engine URL and authentication JWT.
+4. **EngineCloud Configuration**: For EngineCloud operations, you may need the Vault Access Token for server wallet operations.
 
 You can provide these through command-line options or environment variables.
 
@@ -66,7 +68,8 @@ THIRDWEB_SECRET_KEY=... thirdweb-mcp --transport sse --port 8080
 THIRDWEB_SECRET_KEY=... thirdweb-mcp --chain-id 1 --chain-id 137 \
     --engine-url YOUR_ENGINE_URL \
     --engine-auth-jwt YOUR_ENGINE_JWT \ 
-    --engine-backend-wallet-address YOUR_ENGINE_BACKEND_WALLET_ADDRESS
+    --engine-backend-wallet-address YOUR_ENGINE_BACKEND_WALLET_ADDRESS \
+    --vault-access-token YOUR_VAULT_ACCESS_TOKEN
 ```
 
 ### Environment variables
@@ -77,6 +80,8 @@ You can also configure the MCP server using environment variables:
 - `THIRDWEB_ENGINE_URL`: URL endpoint for thirdweb Engine service
 - `THIRDWEB_ENGINE_AUTH_JWT`: Authentication JWT token for Engine
 - `THIRDWEB_ENGINE_BACKEND_WALLET_ADDRESS`: Wallet address for Engine backend
+- `THIRDWEB_ENGINE_CLOUD_URL`: URL endpoint for EngineCloud service (defaults to https://engine.thirdweb.com/v1)
+- `THIRDWEB_VAULT_ACCESS_TOKEN`: Vault access token for EngineCloud server wallet operations
 
 ### Integration with Claude Desktop
 To add this MCP server to Claude Desktop:
@@ -100,7 +105,8 @@ To add this MCP server to Claude Desktop:
            "THIRDWEB_SECRET_KEY": "your thirdweb secret key from dashboard",
            "THIRDWEB_ENGINE_URL": "(OPTIONAL) your engine url",
            "THIRDWEB_ENGINE_AUTH_JWT": "(OPTIONAL) your engine auth jwt",
-           "THIRDWEB_ENGINE_BACKEND_WALLET_ADDRESS": "(OPTIONAL) your engine backend wallet address",           
+           "THIRDWEB_ENGINE_BACKEND_WALLET_ADDRESS": "(OPTIONAL) your engine backend wallet address",
+           "THIRDWEB_VAULT_ACCESS_TOKEN": "(OPTIONAL) your vault access token for EngineCloud"
          },
        }
      }
@@ -141,6 +147,14 @@ Integrates with thirdweb's backend infrastructure:
 - Deploy smart contracts
 - Interact with deployed contracts
 - Manage wallet connections and transactions
+
+### EngineCloud
+
+Cloud-based engine operations with advanced capabilities:
+- Create and manage server wallets with KMS integration
+- Read from and write to smart contracts
+- Send transactions and query transaction history
+- Check native token balances on various chains
 
 ### Storage
 
