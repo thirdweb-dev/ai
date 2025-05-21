@@ -1,12 +1,10 @@
-# thirdweb-ai with AutoGen
+# thirdweb-ai with Google Agent Development Kit (ADK)
 
-This example demonstrates how to integrate thirdweb-ai's blockchain tooling with [AutoGen](https://github.com/microsoft/autogen), an open-source framework from Microsoft Research for building autonomous agents.
+This example demonstrates how to integrate thirdweb-ai's blockchain tooling with [Google ADK](https://github.com/google/adk-python), an open-source toolkit from Google for building autonomous agents.
 
 ## Overview
 
-thirdweb-ai provides powerful blockchain data access and interaction tools through its Insight and Nebula services. This example shows how to use these tools with AutoGen to create an AI assistant that can answer queries about blockchain data, resolve ENS names, check wallet balances, and more, all through natural language.
-
-The example creates an AutoGen assistant agent with thirdweb's blockchain tools and demonstrates querying blockchain data, including wallet balances and transaction information.
+thirdweb-ai provides powerful blockchain data access and interaction tools through its Insight and Nebula services. This example shows how to use these tools with Google ADK to create an AI assistant that can answer queries about blockchain data, check wallet balances, and more, all through natural language.
 
 ## Installation
 
@@ -33,16 +31,14 @@ python example.py
 ```
 
 The script demonstrates using the agent to:
-- Check wallet balances
-- Get transaction history
-- Resolve ENS names
+- Get details of a transaction
 
 ## Customization
 
 You can customize the assistant by modifying the example code:
 - Add different types of tools by extending the `tools` list
 - Change the model by modifying the `model` configuration
-- Add your own queries to the `queries` list
+- Add your own queries
 
 ## Requirements
 
