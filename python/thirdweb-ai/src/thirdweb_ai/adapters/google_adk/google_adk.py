@@ -1,3 +1,4 @@
+import copy
 from typing import Any
 
 from google.adk.tools import BaseTool, ToolContext
@@ -5,7 +6,6 @@ from google.genai import types
 
 from thirdweb_ai.tools.tool import Tool, ToolSchema
 
-from pydantic import BaseModel
 
 class GoogleAdkTool(BaseTool):
     """Adapter for Thirdweb Tool to Google ADK BaseTool.
@@ -40,38 +40,34 @@ class GoogleAdkTool(BaseTool):
         Returns:
             A FunctionDeclaration for Google ADK
         """
-        # Deep copy the parameters to avoid modifying the original
-        import copy
-        parameters = copy.deepcopy(self.tool.schema["parameters"])
-        
-        if "additionalProperties" in parameters:
-            del parameters["additionalProperties"]
-        
-        def remove_additional_properties(obj: dict[str, Any]):
-            if "additionalProperties" in obj:
-                del obj["additionalProperties"]
-                
-            if "items" in obj and isinstance(obj["items"], dict):
-                remove_additional_properties(obj["items"])
-            
-            if "properties" in obj and isinstance(obj["properties"], dict):
-                for prop in obj["properties"].values():
-                    if isinstance(prop, dict):
-                        remove_additional_properties(prop)
-        
-        if "properties" in parameters:
-            for prop in parameters["properties"].values():
-                remove_additional_properties(prop)
-        
+
+        if "parameters" not in self.tool.schema:
+            raise ValueError("Tool schema must contain 'parameters'.")
+
+        # Create a clean parameters dict without additionalProperties
+        parameters = copy.deepcopy(dict(self.tool.schema["parameters"]))
+
+        # Remove additionalProperties recursively from the entire schema
+        def clean_schema(obj: dict[str, Any]) -> dict[str, Any]:
+            cleaned = {k: v for k, v in obj.items() if k != "additionalProperties"}
+
+            for key, value in cleaned.items():
+                if isinstance(value, dict):
+                    cleaned[key] = clean_schema(value)
+                elif isinstance(value, list):
+                    cleaned[key] = [clean_schema(item) if isinstance(item, dict) else item for item in value]
+
+            return cleaned
+
+        clean_parameters = clean_schema(parameters)
+
         return types.FunctionDeclaration(
             name=self.name,
             description=self.description,
-            parameters=parameters,
+            parameters=types.Schema(**clean_parameters),
         )
 
-    # Override the method with the expected signature based on the error message
-    # and adapting from the reference implementation
-    async def run_async(self, args: dict[str, Any], tool_context: ToolContext) -> Any:
+    async def run_async(self, *, args: dict[str, Any], tool_context: ToolContext) -> Any:
         """Execute the tool asynchronously.
 
         This method adapts the Thirdweb tool to work with Google ADK's async execution.

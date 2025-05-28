@@ -29,15 +29,15 @@ def _get_openai_schema(schema: Any):
 
 def get_agents_tools(tools: list[Tool]):
     def _get_tool(tool: Tool):
-        async def _invoke_tool(ctx: RunContextWrapper[Any], tool_input: str, _t: Tool = tool) -> str:  # type: ignore # noqa: PGH003
+        async def _invoke_tool(ctx: RunContextWrapper[Any], tool_input: str, _t: Tool = tool) -> str:
             input_args = json.loads(tool_input) if tool_input else {}
             return _t.return_value_as_string(_t.run_json(input_args))
 
         schema = _get_openai_schema(tool.schema.get("parameters"))
-        return FunctionTool(  # type: ignore # noqa: PGH003
+        return FunctionTool(
             name=tool.name,
             description=tool.description,
-            params_json_schema=schema,
+            params_json_schema=schema or {},
             on_invoke_tool=_invoke_tool,
         )
 
