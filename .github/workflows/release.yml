@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./python/thirdweb-ai
+        working-directory: ./python
     environment:
       name: pypi
       url: https://pypi.org/p/thirdweb-ai
@@ -30,22 +30,22 @@ jobs:
         with:
           enable-cache: true
           cache-dependency-glob: "uv.lock" # Update cache if uv.lock changes
-      
-      - name: Build thirdweb-mcp
-        run: uv build
+
+      - name: Build thirdweb-ai
+        run: uv build --package thirdweb-ai
 
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_KEY }}
-          packages-dir: python/thirdweb-ai/dist/
+          packages-dir: dist/
 
   build-and-publish-mcp:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./python/thirdweb-mcp
+        working-directory: ./python
     environment:
       name: pypi
       url: https://pypi.org/p/thirdweb-mcp
@@ -66,13 +66,13 @@ jobs:
         with:
           enable-cache: true
           cache-dependency-glob: "uv.lock" # Update cache if uv.lock changes
-      
+
       - name: Build thirdweb-mcp
-        run: uv build
+        run: uv build --package thirdweb-mcp
 
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_KEY }}
-          packages-dir: python/thirdweb-mcp/dist/
+          packages-dir: dist/
