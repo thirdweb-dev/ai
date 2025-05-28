@@ -72,7 +72,7 @@ def args_base_model_from_signature(name: str, sig: inspect.Signature) -> type[Ba
     fields: dict[str, tuple[type[Any], Any]] = {}
     for param_name, param in sig.parameters.items():
         # This is handled externally
-        if param_name == "cancellation_token" or param_name == "self":
+        if param_name in ["cancellation_token", "self"]:
             continue
 
         if param.annotation is inspect.Parameter.empty:
@@ -196,10 +196,7 @@ class BaseTool(ABC, Tool, Generic[ArgsT, ReturnT]):
         return self._return_type
 
     def return_value_as_string(self, value: Any) -> str:
-        if isinstance(value, BaseModel):
-            return value.model_dump_json()
-
-        return str(value)
+        return value.model_dump_json() if isinstance(value, BaseModel) else str(value)
 
     @abstractmethod
     def run(self, args: ArgsT | None = None) -> ReturnT: ...
@@ -225,7 +222,7 @@ class FunctionTool(BaseTool[BaseModel, BaseModel]):
             if isinstance(func_definition, functools.partial)
             else name or func_definition.__name__
         )
-        args_model = args_base_model_from_signature(func_name + "args", self._signature)
+        args_model = args_base_model_from_signature(f"{func_name}args", self._signature)
         return_type = self._signature.return_annotation
         super().__init__(args_model, return_type, func_name, description, strict)
 

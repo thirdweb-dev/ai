@@ -218,3 +218,14 @@ class EngineCloud(Service):
         }
 
         return self._post("transactions/search", payload)
+
+    @tool(
+        description="List all engine server wallets for the current project. Returns an array of EOA addresses with their corresponding predicted smart account addresses."
+    )
+    def get_accounts(self) -> dict[str, Any]:
+        """Get all engine server wallets for the current project.
+
+        Returns:
+            dict containing list of account objects with address and smartAccountAddress
+        """
+        return self._get("accounts")

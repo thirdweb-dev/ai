@@ -49,6 +49,7 @@ dev = [
     "pytest-mock>=3.12.0,<4",
     "pytest-cov>=4.1.0,<5",
     "ipython>=8.34.0",
+    "thirdweb-mcp",
 ]
 
 [tool.hatch.build.targets.sdist]
@@ -87,6 +88,9 @@ dependencies = [
 vcs = "git"
 style = "semver"
 format = "{base}"
+
+[tool.uv.sources]
+thirdweb-mcp = { workspace = true }
 
 [tool.pyright]
 include = ["src"]
