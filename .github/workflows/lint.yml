@@ -16,9 +16,16 @@ jobs:
   check:
     strategy:
       fail-fast: true
+      matrix:
+        project:
+          - thirdweb-ai
+          - thirdweb-mcp
 
-    name: Linter
+    name: Linter (${{ matrix.project }})
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./python/${{ matrix.project }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
@@ -29,7 +36,7 @@ jobs:
         uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
         with:
           cache: true
-          cache-dependency-path: "uv.lock" # Update cache if uv.lock changes
+          cache-dependency-path: "python/${{ matrix.project }}/uv.lock" # Update cache if uv.lock changes
 
       - name: Install the project
         run: uv sync --all-extras --dev
@@ -47,3 +54,4 @@ jobs:
         uses: jakebailey/pyright-action@b5d50e5cde6547546a5c4ac92e416a8c2c1a1dfe # v2.3.2
         with:
           version: PATH
+          working-directory: ./python/${{ matrix.project }}
