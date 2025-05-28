@@ -39,7 +39,7 @@ jobs:
           cache-dependency-path: "python/${{ matrix.project }}/uv.lock" # Update cache if uv.lock changes
 
       - name: Install the project
-        run: uv sync --all-extras --dev
+        run: uv sync --group dev --all-extras
 
       - name: Configure path
         run: echo "$PWD/.venv/bin" >> $GITHUB_PATH

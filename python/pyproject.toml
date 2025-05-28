@@ -1,0 +1,2 @@
+[tool.uv.workspace]
+members = ["thirdweb-ai", "thirdweb-mcp"]

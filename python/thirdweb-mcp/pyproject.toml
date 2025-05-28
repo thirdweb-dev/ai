@@ -14,6 +14,7 @@ thirdweb-mcp = "src.mcp:main"
 dev = [
     "ruff>=0.9.10,<0.10",
     "pyright>=1.1.396,<2",
+    "thirdweb-ai[mcp]",
 ]
 
 [tool.hatch.build.targets.sdist]
@@ -47,3 +48,6 @@ vcs = "git"
 style = "semver"
 format = "{base}"
 dev_mode = "env:THIRDWEB_DEV_MODE"
+
+[tool.uv.sources]
+thirdweb-ai = { workspace = true }
