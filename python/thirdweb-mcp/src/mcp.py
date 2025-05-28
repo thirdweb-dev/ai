@@ -1,4 +1,5 @@
 import os
+from typing import Literal
 
 import click
 from thirdweb_ai import Engine, EngineCloud, Insight, Nebula, Storage
@@ -62,7 +63,7 @@ from mcp.server.fastmcp import FastMCP
 )
 def main(
     port: int,
-    transport: str,
+    transport: Literal["stdio", "sse"],
     secret_key: str,
     chain_id: list[int],
     engine_url: str,
@@ -113,7 +114,7 @@ def main(
     if "engine_cloud" in services:
         engine_cloud = EngineCloud(
             secret_key=secret_key,
-            vault_access_token=vault_access_token,
+            vault_access_token=vault_access_token or "",
         )
         add_fastmcp_tools(mcp, engine_cloud.get_tools())
 
