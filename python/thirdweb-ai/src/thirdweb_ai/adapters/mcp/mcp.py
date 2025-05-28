@@ -9,7 +9,7 @@ from thirdweb_ai import Tool
 
 def get_fastmcp_tools(tools: list[Tool]) -> list[FastMCPTool]:
     return [
-        FastMCPTool(
+        FastMCPTool(  # type: ignore[reportUnknownVariableType]
             fn=lambda _t=tool, **kwargs: _t.run_json(kwargs),
             name=tool.name,
             description=tool.description,
@@ -17,7 +17,6 @@ def get_fastmcp_tools(tools: list[Tool]) -> list[FastMCPTool]:
             fn_metadata=func_metadata(tool._func_definition, skip_names=["self"]),  # noqa: SLF001
             is_async=False,
             context_kwarg=None,
-            annotations=tool.annotations,
         )
         for tool in tools
     ]
